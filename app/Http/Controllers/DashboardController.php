@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Balita;
+use App\Models\Kecamatan;
+use App\Models\Kehadiran;
+use App\Models\Kelurahan;
 use App\Models\PertumbuhanRecord;
 use App\Models\Posyandu;
+use App\Models\Rujukan;
 use App\Services\ReportGenerator;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -26,8 +30,8 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Statistik seluruh Jakarta
-        $totalKecamatan = \App\Models\Kecamatan::count();
-        $totalKelurahan = \App\Models\Kelurahan::count();
+        $totalKecamatan = Kecamatan::count();
+        $totalKelurahan = Kelurahan::count();
         $totalPosyandu = Posyandu::count();
         $totalBalita = Balita::where('status', 'aktif')->count();
 
@@ -38,7 +42,7 @@ class DashboardController extends Controller
             ->orderBy('pertumbuhan_records.tanggal', 'desc')
             ->get()
             ->groupBy('balita_id')
-            ->map(fn($records) => $records->first());
+            ->map(fn ($records) => $records->first());
 
         $statusGizi = [
             'normal' => $latestRecords->where('status_gizi', 'normal')->count(),
@@ -52,7 +56,7 @@ class DashboardController extends Controller
         $giziBurukBalitas = Balita::where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
                 $q->where('status_gizi', 'gizi_buruk')
-                  ->orderBy('tanggal', 'desc');
+                    ->orderBy('tanggal', 'desc');
             })
             ->with(['posyandu.kelurahan.kecamatan', 'pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
@@ -81,8 +85,8 @@ class DashboardController extends Controller
         $totalKelurahan = $kecamatan->kelurahans->count();
         $totalPosyandu = Posyandu::whereIn('kelurahan_id', $kecamatan->kelurahans->pluck('id'))->count();
         $totalBalita = Balita::whereHas('posyandu', function ($q) use ($kecamatan) {
-                $q->whereIn('kelurahan_id', $kecamatan->kelurahans->pluck('id'));
-            })
+            $q->whereIn('kelurahan_id', $kecamatan->kelurahans->pluck('id'));
+        })
             ->where('status', 'aktif')
             ->count();
 
@@ -95,7 +99,7 @@ class DashboardController extends Controller
             ->orderBy('pertumbuhan_records.tanggal', 'desc')
             ->get()
             ->groupBy('balita_id')
-            ->map(fn($records) => $records->first());
+            ->map(fn ($records) => $records->first());
 
         $statusGizi = [
             'normal' => $latestRecords->where('status_gizi', 'normal')->count(),
@@ -107,12 +111,12 @@ class DashboardController extends Controller
 
         // Gizi buruk di kecamatan
         $giziBurukBalitas = Balita::whereHas('posyandu', function ($q) use ($posyanduIds) {
-                $q->whereIn('posyandu_id', $posyanduIds);
-            })
+            $q->whereIn('posyandu_id', $posyanduIds);
+        })
             ->where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
                 $q->where('status_gizi', 'gizi_buruk')
-                  ->orderBy('tanggal', 'desc');
+                    ->orderBy('tanggal', 'desc');
             })
             ->with(['posyandu.kelurahan', 'pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
@@ -140,8 +144,8 @@ class DashboardController extends Controller
 
         $totalPosyandu = $kelurahan->posyandus->count();
         $totalBalita = Balita::whereHas('posyandu', function ($q) use ($kelurahan) {
-                $q->where('kelurahan_id', $kelurahan->id);
-            })
+            $q->where('kelurahan_id', $kelurahan->id);
+        })
             ->where('status', 'aktif')
             ->count();
 
@@ -154,7 +158,7 @@ class DashboardController extends Controller
             ->where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
                 $q->where('status_gizi', 'gizi_buruk')
-                  ->orderBy('tanggal', 'desc');
+                    ->orderBy('tanggal', 'desc');
             })
             ->with(['posyandu', 'pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
@@ -189,12 +193,12 @@ class DashboardController extends Controller
 
         // Balita gizi buruk untuk tindak lanjut (rujukan)
         $giziBurukBalitas = Balita::whereHas('posyandu.kelurahan', function ($q) use ($puskesmas) {
-                $q->where('kecamatan_id', $puskesmas->kecamatan_id);
-            })
+            $q->where('kecamatan_id', $puskesmas->kecamatan_id);
+        })
             ->where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
                 $q->where('status_gizi', 'gizi_buruk')
-                  ->orderBy('tanggal', 'desc');
+                    ->orderBy('tanggal', 'desc');
             })
             ->with(['posyandu.kelurahan', 'pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
@@ -203,7 +207,7 @@ class DashboardController extends Controller
             ->get();
 
         // Rujukan yang sedang diproses
-        $rujukanAktif = \App\Models\Rujukan::where('puskesmas_id', $puskesmas->id)
+        $rujukanAktif = Rujukan::where('puskesmas_id', $puskesmas->id)
             ->whereIn('status', ['dirujuk', 'diteruskan'])
             ->with(['balita', 'nakes'])
             ->orderBy('tanggal_rujuk', 'desc')
@@ -230,7 +234,7 @@ class DashboardController extends Controller
             ->where('status', 'aktif')
             ->count();
 
-        $hadirBulanIni = \App\Models\Kehadiran::where('posyandu_id', $posyandu->id)
+        $hadirBulanIni = Kehadiran::where('posyandu_id', $posyandu->id)
             ->where('hadir', true)
             ->whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
@@ -288,7 +292,7 @@ class DashboardController extends Controller
         // Mapping hari
         $hariMap = [
             'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4,
-            'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0
+            'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0,
         ];
 
         $targetHari = $hariMap[$hari] ?? 1;
@@ -324,14 +328,14 @@ class DashboardController extends Controller
      */
     public function getStatusGiziStatsForPosyanduIds($posyanduIds): array
     {
-        $latestRecords = \Illuminate\Support\Facades\DB::table('pertumbuhan_records as pr')
+        $latestRecords = DB::table('pertumbuhan_records as pr')
             ->select('pr.balita_id', 'pr.status_gizi')
             ->join('balitas as b', 'pr.balita_id', '=', 'b.id')
             ->whereIn('b.posyandu_id', $posyanduIds)
             ->orderBy('pr.tanggal', 'desc')
             ->get()
             ->groupBy('balita_id')
-            ->map(fn($records) => $records->first());
+            ->map(fn ($records) => $records->first());
 
         return [
             'normal' => $latestRecords->where('status_gizi', 'normal')->count(),

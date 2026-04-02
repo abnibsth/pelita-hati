@@ -79,7 +79,7 @@ class PertumbuhanController extends Controller
         $result->save();
 
         return redirect()->route('balita.show', $balita)
-            ->with('success', 'Data pertumbuhan berhasil ditambahkan. Status gizi: ' . strtoupper($result->status_gizi));
+            ->with('success', 'Data pertumbuhan berhasil ditambahkan. Status gizi: '.strtoupper($result->status_gizi));
     }
 
     /**

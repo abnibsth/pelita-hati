@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Posyandu;
 use App\Models\Kelurahan;
+use App\Models\Posyandu;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -32,7 +32,7 @@ class PosyanduController extends Controller
 
         // Search
         if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $posyandus = $query->orderBy('name')->paginate(15);
@@ -93,7 +93,7 @@ class PosyanduController extends Controller
             },
             'users' => function ($q) {
                 $q->where('role', 'kader');
-            }
+            },
         ]);
 
         // Get statistics
@@ -128,7 +128,7 @@ class PosyanduController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:posyandus,code,' . $posyandu->id,
+            'code' => 'required|string|max:50|unique:posyandus,code,'.$posyandu->id,
             'kelurahan_id' => 'required|exists:kelurahans,id',
             'address' => 'nullable|string',
             'jadwal_minggu_ke' => 'required|in:1,2,3,4',

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Posyandu;
-use App\Models\Kelurahan;
 use App\Models\Kecamatan;
+use App\Models\Kelurahan;
+use App\Models\Posyandu;
 use App\Models\Puskesmas;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
 class UserController extends Controller
@@ -27,9 +27,9 @@ class UserController extends Controller
         if ($user->role === 'admin_kecamatan') {
             $query->where(function ($q) use ($user) {
                 $q->where('kecamatan_id', $user->kecamatan_id)
-                  ->orWhereHas('kelurahan', function ($q2) use ($user) {
-                      $q2->where('kecamatan_id', $user->kecamatan_id);
-                  });
+                    ->orWhereHas('kelurahan', function ($q2) use ($user) {
+                        $q2->where('kecamatan_id', $user->kecamatan_id);
+                    });
             });
         } elseif ($user->role === 'admin_kelurahan') {
             $query->where('kelurahan_id', $user->kelurahan_id);
@@ -43,9 +43,9 @@ class UserController extends Controller
         // Search
         if ($request->has('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%')
-                  ->orWhere('nik', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', 'like', '%'.$request->search.'%')
+                    ->orWhere('nik', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -151,10 +151,10 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:admin_kota,admin_kecamatan,admin_kelurahan,nakes_puskesmas,kader,orangtua',
-            'nik' => 'required|string|size:16|unique:users,nik,' . $user->id,
+            'nik' => 'required|string|size:16|unique:users,nik,'.$user->id,
             'phone' => 'nullable|string|max:20',
             'kelurahan_id' => 'nullable|exists:kelurahans,id',
             'kecamatan_id' => 'nullable|exists:kecamatans,id',
@@ -162,7 +162,7 @@ class UserController extends Controller
             'puskesmas_id' => 'nullable|exists:puskesmas,id',
         ]);
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
@@ -210,6 +210,7 @@ class UserController extends Controller
         } elseif ($user->role === 'admin_kecamatan') {
             return Kecamatan::where('id', $user->kecamatan_id)->get();
         }
+
         return collect();
     }
 
@@ -227,6 +228,7 @@ class UserController extends Controller
         } elseif ($user->role === 'admin_kelurahan') {
             return Kelurahan::where('id', $user->kelurahan_id)->get();
         }
+
         return collect();
     }
 
@@ -248,6 +250,7 @@ class UserController extends Controller
         } elseif ($user->role === 'kader') {
             return Posyandu::where('id', $user->posyandu_id)->get();
         }
+
         return collect();
     }
 
@@ -263,6 +266,7 @@ class UserController extends Controller
                 ->with('kecamatan')
                 ->get();
         }
+
         return collect();
     }
 }

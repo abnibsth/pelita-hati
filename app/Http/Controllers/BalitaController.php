@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Balita;
 use App\Models\Posyandu;
-use App\Models\PertumbuhanRecord;
 use App\Services\GiziCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,8 +47,8 @@ class BalitaController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%")
-                  ->orWhere('mother_name', 'like', "%{$search}%");
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('mother_name', 'like', "%{$search}%");
             });
         }
 
@@ -125,7 +124,7 @@ class BalitaController extends Controller
                 $q->orderBy('tanggal', 'desc');
             },
             'orangtua',
-            'posyandu.kelurahan.kecamatan'
+            'posyandu.kelurahan.kecamatan',
         ]);
 
         // Get latest growth record
@@ -134,11 +133,11 @@ class BalitaController extends Controller
         // Get growth trend for chart
         $growthTrend = [
             'labels' => $balita->pertumbuhanRecords->sortBy('tanggal')
-                ->map(fn($r) => $r->tanggal->format('d M Y')),
+                ->map(fn ($r) => $r->tanggal->format('d M Y')),
             'berat_badan' => $balita->pertumbuhanRecords->sortBy('tanggal')
-                ->map(fn($r) => $r->berat_badan),
+                ->map(fn ($r) => $r->berat_badan),
             'tinggi_badan' => $balita->pertumbuhanRecords->sortBy('tanggal')
-                ->map(fn($r) => $r->tinggi_badan),
+                ->map(fn ($r) => $r->tinggi_badan),
         ];
 
         return view('balita.show', compact('balita', 'latestGrowth', 'growthTrend'));
@@ -165,7 +164,7 @@ class BalitaController extends Controller
         Gate::authorize('update', $balita);
 
         $validated = $request->validate([
-            'nik' => 'required|string|size:16|unique:balitas,nik,' . $balita->id,
+            'nik' => 'required|string|size:16|unique:balitas,nik,'.$balita->id,
             'name' => 'required|string|max:255',
             'birth_date' => 'required|date|before:today',
             'gender' => 'required|in:L,P',

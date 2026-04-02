@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Balita;
 use App\Models\Posyandu;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Balita>
+ * @extends Factory<Balita>
  */
 class BalitaFactory extends Factory
 {

@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Models\Balita;
-use App\Models\PertumbuhanRecord;
-use App\Models\Posyandu;
-use App\Models\Kelurahan;
+use App\Models\ImunisasiRecord;
 use App\Models\Kecamatan;
 use App\Models\Kehadiran;
-use App\Models\ImunisasiRecord;
+use App\Models\Kelurahan;
+use App\Models\PertumbuhanRecord;
+use App\Models\Posyandu;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -43,15 +43,15 @@ class ReportGenerator
 
         // D - Diberi: Jumlah balita yang dapat pelayanan (penimbangan)
         $diberi = PertumbuhanRecord::whereHas('balita', function ($q) use ($posyandu) {
-                $q->where('posyandu_id', $posyandu->id);
-            })
+            $q->where('posyandu_id', $posyandu->id);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->count();
 
         // N - Nutrisi: Jumlah balita dengan gizi buruk
         $nutrisi = PertumbuhanRecord::whereHas('balita', function ($q) use ($posyandu) {
-                $q->where('posyandu_id', $posyandu->id);
-            })
+            $q->where('posyandu_id', $posyandu->id);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->where('status_gizi', 'gizi_buruk')
             ->count();
@@ -91,15 +91,15 @@ class ReportGenerator
 
         // D - Diberi
         $diberi = PertumbuhanRecord::whereHas('balita', function ($q) use ($posyanduIds) {
-                $q->whereIn('posyandu_id', $posyanduIds);
-            })
+            $q->whereIn('posyandu_id', $posyanduIds);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->count();
 
         // N - Nutrisi
         $nutrisi = PertumbuhanRecord::whereHas('balita', function ($q) use ($posyanduIds) {
-                $q->whereIn('posyandu_id', $posyanduIds);
-            })
+            $q->whereIn('posyandu_id', $posyanduIds);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->where('status_gizi', 'gizi_buruk')
             ->count();
@@ -140,15 +140,15 @@ class ReportGenerator
 
         // D - Diberi
         $diberi = PertumbuhanRecord::whereHas('balita', function ($q) use ($posyanduIds) {
-                $q->whereIn('posyandu_id', $posyanduIds);
-            })
+            $q->whereIn('posyandu_id', $posyanduIds);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->count();
 
         // N - Nutrisi
         $nutrisi = PertumbuhanRecord::whereHas('balita', function ($q) use ($posyanduIds) {
-                $q->whereIn('posyandu_id', $posyanduIds);
-            })
+            $q->whereIn('posyandu_id', $posyanduIds);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->where('status_gizi', 'gizi_buruk')
             ->count();
@@ -196,7 +196,7 @@ class ReportGenerator
             ->where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
                 $q->where('status_gizi', 'gizi_buruk')
-                  ->orderBy('tanggal', 'desc');
+                    ->orderBy('tanggal', 'desc');
             })
             ->with(['pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
@@ -214,7 +214,7 @@ class ReportGenerator
             ->where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
                 $q->where('status_gizi', 'stunting')
-                  ->orderBy('tanggal', 'desc');
+                    ->orderBy('tanggal', 'desc');
             })
             ->with(['pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
@@ -264,7 +264,7 @@ class ReportGenerator
 
         $imunisasiTypes = [
             'HB-0', 'BCG', 'Polio-1', 'Polio-2', 'Polio-3', 'Polio-4',
-            'DPT-HB-1', 'DPT-HB-2', 'DPT-HB-3', 'Campak', 'Campak-Rubella'
+            'DPT-HB-1', 'DPT-HB-2', 'DPT-HB-3', 'Campak', 'Campak-Rubella',
         ];
 
         $stats = [];
@@ -298,12 +298,12 @@ class ReportGenerator
             ->get();
 
         return [
-            'labels' => $records->map(fn($r) => $r->tanggal->format('M Y')),
-            'berat_badan' => $records->map(fn($r) => $r->berat_badan),
-            'tinggi_badan' => $records->map(fn($r) => $r->tinggi_badan),
-            'z_score_bbu' => $records->map(fn($r) => $r->z_score_bbu),
-            'z_score_tbu' => $records->map(fn($r) => $r->z_score_tbu),
-            'z_score_bbtb' => $records->map(fn($r) => $r->z_score_bbtb),
+            'labels' => $records->map(fn ($r) => $r->tanggal->format('M Y')),
+            'berat_badan' => $records->map(fn ($r) => $r->berat_badan),
+            'tinggi_badan' => $records->map(fn ($r) => $r->tinggi_badan),
+            'z_score_bbu' => $records->map(fn ($r) => $r->z_score_bbu),
+            'z_score_tbu' => $records->map(fn ($r) => $r->z_score_tbu),
+            'z_score_bbtb' => $records->map(fn ($r) => $r->z_score_bbtb),
         ];
     }
 }

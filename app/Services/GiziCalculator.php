@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Balita;
 use App\Models\PertumbuhanRecord;
-use Carbon\Carbon;
+use App\Models\User;
 
 /**
  * Service untuk menghitung status gizi balita berdasarkan standar WHO 2005
@@ -13,12 +13,11 @@ class GiziCalculator
 {
     /**
      * Hitung Z-Score dan status gizi berdasarkan antropometri WHO
-     * 
-     * @param float $beratBerat Badan dalam kg
-     * @param float $tinggi Tinggi Badan dalam cm
-     * @param int $ageMonths Umur dalam bulan
-     * @param string $gender L atau P
-     * @return array
+     *
+     * @param  float  $beratBerat  Badan dalam kg
+     * @param  float  $tinggi  Tinggi Badan dalam cm
+     * @param  int  $ageMonths  Umur dalam bulan
+     * @param  string  $gender  L atau P
      */
     public function calculate(
         float $beratBadan,
@@ -28,15 +27,15 @@ class GiziCalculator
     ): array {
         // Dapatkan nilai referensi WHO
         $whoStandards = $this->getWhoStandards($ageMonths, $gender);
-        
+
         // Hitung Z-Scores
         $zScoreBBU = $this->calculateZScoreBBU($beratBadan, $ageMonths, $gender);
         $zScoreTBU = $this->calculateZScoreTBU($tinggiBadan, $ageMonths, $gender);
         $zScoreBBTB = $this->calculateZScoreBBTB($beratBadan, $tinggiBadan, $gender);
-        
+
         // Tentukan status gizi
         $statusGizi = $this->determineStatusGizi($zScoreBBU, $zScoreTBU, $zScoreBBTB);
-        
+
         return [
             'z_score_bbu' => round($zScoreBBU, 2),
             'z_score_tbu' => round($zScoreTBU, 2),
@@ -54,6 +53,7 @@ class GiziCalculator
     private function calculateZScoreBBU(float $bb, int $ageMonths, string $gender): float
     {
         $standards = $this->getWhoStandardsBBU($ageMonths, $gender);
+
         return $this->calculateZScoreFromStandards($bb, $standards);
     }
 
@@ -63,6 +63,7 @@ class GiziCalculator
     private function calculateZScoreTBU(float $tb, int $ageMonths, string $gender): float
     {
         $standards = $this->getWhoStandardsTBU($ageMonths, $gender);
+
         return $this->calculateZScoreFromStandards($tb, $standards);
     }
 
@@ -72,6 +73,7 @@ class GiziCalculator
     private function calculateZScoreBBTB(float $bb, float $tb, string $gender): float
     {
         $standards = $this->getWhoStandardsBBTB($tb, $gender);
+
         return $this->calculateZScoreFromStandards($bb, $standards);
     }
 
@@ -131,7 +133,7 @@ class GiziCalculator
 
     /**
      * Dapatkan standar WHO untuk BB/U
-     * Data disederhanakan untuk contoh - dalam implementasi nyata, 
+     * Data disederhanakan untuk contoh - dalam implementasi nyata,
      * gunakan tabel lengkap WHO 2005
      */
     private function getWhoStandardsBBU(int $ageMonths, string $gender): array
@@ -169,9 +171,10 @@ class GiziCalculator
         ];
 
         $genderData = $standards[$gender] ?? $standards['L'];
-        
+
         // Cari data yang paling mendekati
         $closest = $this->findClosestAge($ageMonths, array_keys($genderData));
+
         return $genderData[$closest] ?? ['L' => 1, 'M' => 10, 'S' => 0.1];
     }
 
@@ -213,6 +216,7 @@ class GiziCalculator
 
         $genderData = $standards[$gender] ?? $standards['L'];
         $closest = $this->findClosestAge($ageMonths, array_keys($genderData));
+
         return $genderData[$closest] ?? ['L' => 1, 'M' => 75, 'S' => 0.015];
     }
 
@@ -258,6 +262,7 @@ class GiziCalculator
 
         $genderData = $standards[$gender] ?? $standards['L'];
         $closest = $this->findClosestHeight($tinggiBadan, array_keys($genderData));
+
         return $genderData[$closest] ?? ['L' => 1, 'M' => 12, 'S' => 0.09];
     }
 
@@ -307,10 +312,10 @@ class GiziCalculator
         float $beratBadan,
         float $tinggiBadan,
         $kader,
-        string $catatan = null
+        ?string $catatan = null
     ): PertumbuhanRecord {
         $ageMonths = $balita->birth_date->diffInMonths(now());
-        
+
         $result = $this->calculate(
             $beratBadan,
             $tinggiBadan,
@@ -328,7 +333,7 @@ class GiziCalculator
             'z_score_bbu' => $result['z_score_bbu'],
             'z_score_tbu' => $result['z_score_tbu'],
             'z_score_bbtb' => $result['z_score_bbtb'],
-            'kader_id' => $kader instanceof \App\Models\User ? $kader->id : $kader,
+            'kader_id' => $kader instanceof User ? $kader->id : $kader,
             'catatan' => $catatan,
         ]);
     }
@@ -341,14 +346,14 @@ class GiziCalculator
         if ($months < 12) {
             return "{$months} bulan";
         }
-        
+
         $years = floor($months / 12);
         $remainingMonths = $months % 12;
-        
+
         if ($remainingMonths == 0) {
             return "{$years} tahun";
         }
-        
+
         return "{$years} tahun {$remainingMonths} bulan";
     }
 }

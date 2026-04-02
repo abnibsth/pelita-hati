@@ -4,28 +4,28 @@
 @section('page-title', 'Data Balita')
 
 @section('sidebar')
-<div class="space-y-1">
-    <a href="{{ route('kader.dashboard') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-        <span>Dashboard</span>
-    </a>
-    <a href="{{ route('balita.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary-50 text-primary-700 font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-        <span>Data Balita</span>
-    </a>
-    <a href="{{ route('posyandu.show', auth()->user()->posyandu) }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-        <span>Posyandu</span>
-    </a>
-</div>
+    <x-sidebar-navigation />
 @endsection
 
 @section('content')
 <div class="space-y-6">
+    @php
+    $userRole = auth()->user()->role;
+    $routePrefix = match($userRole) {
+        'admin_kota' => 'admin-kota',
+        'admin_kecamatan' => 'admin-kecamatan',
+        'admin_kelurahan' => 'admin-kelurahan',
+        'nakes_puskesmas' => 'nakes',
+        'kader' => 'kader',
+        default => null,
+    };
+    $balitaPrefix = $routePrefix ? "$routePrefix.balita" : 'balita';
+    @endphp
+
     <!-- Header Actions -->
     <div class="flex items-center justify-between">
         <div class="flex-1 max-w-md">
-            <form method="GET" action="{{ route('balita.index') }}" class="flex space-x-2">
+            <form method="GET" action="{{ route($balitaPrefix . '.index') }}" class="flex space-x-2">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau nama ibu..." 
                     class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
                 <x-button type="submit">
@@ -34,7 +34,7 @@
             </form>
         </div>
         @can('create', App\Models\Balita::class)
-        <x-button href="{{ route('balita.create') }}">
+        <x-button href="{{ route($balitaPrefix . '.create') }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Tambah Balita
         </x-button>
@@ -79,12 +79,12 @@
                             </x-badge>
                         </td>
                         <td class="px-4 py-3 text-sm space-x-2">
-                            <a href="{{ route('balita.show', $balita) }}" class="text-primary-600 hover:text-primary-900">Lihat</a>
+                            <a href="{{ route($balitaPrefix . '.show', $balita) }}" class="text-primary-600 hover:text-primary-900">Lihat</a>
                             @can('update', $balita)
-                            <a href="{{ route('balita.edit', $balita) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                            <a href="{{ route($balitaPrefix . '.edit', $balita) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
                             @endcan
                             @can('delete', $balita)
-                            <form action="{{ route('balita.destroy', $balita) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">
+                            <form action="{{ route($balitaPrefix . '.destroy', $balita) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
@@ -105,7 +105,7 @@
         <x-empty-state message="Belum ada data balita">
             <x-slot:action>
                 @can('create', App\Models\Balita::class)
-                <x-button href="{{ route('balita.create') }}">Tambah Balita Baru</x-button>
+                <x-button href="{{ route($balitaPrefix . '.create') }}">Tambah Balita Baru</x-button>
                 @endcan
             </x-slot:action>
         </x-empty-state>

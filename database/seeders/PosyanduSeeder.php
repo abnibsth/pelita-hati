@@ -34,7 +34,7 @@ class PosyanduSeeder extends Seeder
                 'jadwal_jam_mulai' => '08:00',
                 'jadwal_jam_selesai' => '11:00',
             ],
-            
+
             // Kelurahan Cideng (ID: 2)
             [
                 'name' => 'Posyandu Anggrek 1',
@@ -56,7 +56,7 @@ class PosyanduSeeder extends Seeder
                 'jadwal_jam_mulai' => '08:00',
                 'jadwal_jam_selesai' => '11:00',
             ],
-            
+
             // Kelurahan Gelora (ID: 4)
             [
                 'name' => 'Posyandu Mawar 1',

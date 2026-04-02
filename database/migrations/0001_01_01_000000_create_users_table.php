@@ -21,13 +21,13 @@ return new class extends Migration
             $table->string('nik', 16)->unique();
             $table->string('phone')->nullable();
             $table->string('photo_path')->nullable();
-            
+
             // Foreign keys - nullable, constraints added later
             $table->unsignedBigInteger('kelurahan_id')->nullable();
             $table->unsignedBigInteger('kecamatan_id')->nullable();
             $table->unsignedBigInteger('posyandu_id')->nullable();
             $table->unsignedBigInteger('puskesmas_id')->nullable();
-            
+
             $table->rememberToken();
             $table->timestamps();
         });

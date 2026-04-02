@@ -23,10 +23,10 @@ return new class extends Migration
             $table->string('parent_phone')->nullable();
             $table->text('address')->nullable();
             $table->string('rt_rw')->nullable();
-            
+
             $table->foreignId('posyandu_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete(); // orangtua
-            
+
             $table->enum('status', ['aktif', 'pindah', 'meninggal'])->default('aktif');
             $table->date('registration_date');
             $table->timestamps();

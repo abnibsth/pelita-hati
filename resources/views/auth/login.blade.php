@@ -3,6 +3,21 @@
 @section('title', 'Login - SiPosyandu Jakarta')
 
 @section('content')
+@if(session('success'))
+    <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-800">{{ session('success') }}</p>
+            </div>
+        </div>
+    </div>
+@endif
+
 <form method="POST" action="{{ route('login') }}" class="space-y-6">
     @csrf
     
@@ -32,7 +47,7 @@
                 class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
             <label for="remember" class="ml-2 text-sm text-gray-600">Ingat saya</label>
         </div>
-        <a href="#" class="text-sm text-primary-600 hover:text-primary-700">Lupa password?</a>
+        <a href="{{ route('password.request') }}" class="text-sm text-primary-600 hover:text-primary-700">Lupa password?</a>
     </div>
 
     <button type="submit" 

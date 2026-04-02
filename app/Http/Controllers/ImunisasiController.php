@@ -142,7 +142,7 @@ class ImunisasiController extends Controller
         foreach ($schedule as &$item) {
             $item['done'] = in_array($item['jenis'], $doneImunisasi);
             $item['due_date'] = $balita->birth_date->copy()->addMonths($item['age']);
-            $item['is_overdue'] = !$item['done'] && $item['due_date']->isPast();
+            $item['is_overdue'] = ! $item['done'] && $item['due_date']->isPast();
         }
 
         return view('imunisasi.schedule', compact('balita', 'schedule'));

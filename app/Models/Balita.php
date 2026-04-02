@@ -94,8 +94,8 @@ class Balita extends Model
     {
         $query->whereHas('pertumbuhanRecords', function ($q) {
             $q->where('status_gizi', 'stunting')
-              ->orderBy('tanggal', 'desc')
-              ->limit(1);
+                ->orderBy('tanggal', 'desc')
+                ->limit(1);
         });
     }
 
@@ -103,8 +103,8 @@ class Balita extends Model
     {
         $query->whereHas('pertumbuhanRecords', function ($q) {
             $q->where('status_gizi', 'gizi_buruk')
-              ->orderBy('tanggal', 'desc')
-              ->limit(1);
+                ->orderBy('tanggal', 'desc')
+                ->limit(1);
         });
     }
 }

@@ -19,16 +19,16 @@ return new class extends Migration
             $table->decimal('tinggi_badan', 5, 2); // cm
             $table->decimal('lingkar_kepala', 4, 2)->nullable(); // cm
             $table->decimal('lingkar_lengan_atas', 4, 2)->nullable(); // cm
-            
+
             $table->string('umur_saat_ukur')->nullable(); // calculated
             $table->enum('status_gizi', ['normal', 'kurang', 'lebih', 'gizi_buruk', 'stunting']);
             $table->decimal('z_score_bbu', 6, 2)->nullable(); // Berat menurut Umur
             $table->decimal('z_score_tbu', 6, 2)->nullable(); // Tinggi menurut Umur
             $table->decimal('z_score_bbtb', 6, 2)->nullable(); // Berat menurut Tinggi
-            
+
             $table->foreignId('kader_id')->constrained('users')->cascadeOnDelete();
             $table->text('catatan')->nullable();
-            
+
             $table->timestamps();
         });
     }

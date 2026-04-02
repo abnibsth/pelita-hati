@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('balita_id')->constrained()->cascadeOnDelete();
             $table->enum('jenis', [
-                'Vitamin A', 'Tablet Tambah Darah', 'Obat Cacing', 
-                'Zinc', 'Ferrous Sulfate', 'Lainnya'
+                'Vitamin A', 'Tablet Tambah Darah', 'Obat Cacing',
+                'Zinc', 'Ferrous Sulfate', 'Lainnya',
             ]);
             $table->date('tanggal');
             $table->string('dosis')->nullable();

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('jenis_imunisasi', [
                 'HB-0', 'BCG', 'Polio-1', 'Polio-2', 'Polio-3', 'Polio-4',
                 'DPT-HB-1', 'DPT-HB-2', 'DPT-HB-3',
-                'Campak', 'Campak-Rubella', 'JE', 'PCV', 'Rotavirus', 'MR'
+                'Campak', 'Campak-Rubella', 'JE', 'PCV', 'Rotavirus', 'MR',
             ]);
             $table->date('tanggal_diberikan');
             $table->string('batch_number')->nullable();

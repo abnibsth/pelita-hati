@@ -3,13 +3,24 @@
 @section('title', $balita->name . ' - SiPosyandu')
 @section('page-title', 'Detail Balita')
 
+@php
+$userRole = auth()->user()->role;
+$routePrefix = match($userRole) {
+    'admin_kota' => 'admin-kota',
+    'admin_kecamatan' => 'admin-kecamatan',
+    'admin_kelurahan' => 'admin-kelurahan',
+    'kader' => 'kader',
+    default => '',
+};
+$balitaPrefix = "$routePrefix.balita";
+$pertumbuhanPrefix = "$routePrefix.pertumbuhan";
+@endphp
+
 @section('sidebar')
-<div class="space-y-1">
-    <a href="{{ route('balita.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
+    <a href="{{ route($balitaPrefix . '.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         <span>Kembali</span>
     </a>
-</div>
 @endsection
 
 @section('content')
@@ -29,7 +40,7 @@
             </div>
             <div class="flex space-x-2">
                 @can('update', $balita)
-                <x-button href="{{ route('balita.edit', $balita) }}" variant="outline" size="sm">Edit</x-button>
+                <x-button href="{{ route($balitaPrefix . '.edit', $balita) }}" variant="outline" size="sm">Edit</x-button>
                 @endcan
                 <x-button href="#pertumbuhan" variant="primary" size="sm">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -145,7 +156,7 @@
         @else
         <x-empty-state message="Belum ada data pertumbuhan">
             <x-slot:action>
-                <x-button href="{{ route('pertumbuhan.store', ['balita' => $balita]) }}">Tambah Data Penimbangan</x-button>
+                <x-button href="{{ route($pertumbuhanPrefix . '.store', ['balita' => $balita]) }}">Tambah Data Penimbangan</x-button>
             </x-slot:action>
         </x-empty-state>
         @endif

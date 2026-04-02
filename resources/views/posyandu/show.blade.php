@@ -4,17 +4,20 @@
 @section('page-title', 'Detail Posyandu')
 
 @section('sidebar')
-<div class="space-y-1">
-    <a href="{{ route('posyandu.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        <span>Kembali</span>
-    </a>
-    <a href="{{ route('kader.dashboard') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-        <span>Dashboard</span>
-    </a>
-</div>
+    <x-sidebar-navigation />
 @endsection
+
+@php
+$userRole = auth()->user()->role;
+$routePrefix = match($userRole) {
+    'admin_kota' => 'admin-kota',
+    'admin_kecamatan' => 'admin-kecamatan',
+    'admin_kelurahan' => 'admin-kelurahan',
+    'kader' => 'kader',
+    default => '',
+};
+$posyanduPrefix = "$routePrefix.posyandu";
+@endphp
 
 @section('content')
 <div class="space-y-6">
@@ -84,7 +87,7 @@
             @if($posyandu->balitas->count() > 0)
             <div class="space-y-2 max-h-96 overflow-y-auto">
                 @foreach($posyandu->balitas->take(10) as $balita)
-                <a href="{{ route('balita.show', $balita) }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                <a href="{{ route($routePrefix . '.balita.show', $balita) }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                     <div>
                         <p class="font-medium">{{ $balita->name }}</p>
                         <p class="text-sm text-gray-500">{{ $balita->mother_name }}</p>
@@ -107,12 +110,12 @@
 
     <!-- Actions -->
     <div class="flex flex-wrap gap-4">
-        <x-button href="{{ route('balita.create', ['posyandu_id' => $posyandu->id]) }}">
+        <x-button href="{{ route($routePrefix . '.balita.create', ['posyandu_id' => $posyandu->id]) }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Tambah Balita Baru
         </x-button>
         @can('update', $posyandu)
-        <x-button href="{{ route('posyandu.edit', $posyandu) }}" variant="outline">
+        <x-button href="{{ route($posyanduPrefix . '.edit', $posyandu) }}" variant="outline">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             Edit Posyandu
         </x-button>
