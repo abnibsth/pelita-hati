@@ -47,7 +47,7 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
             </div>
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">{{ $balita->name }}</h3>
-                <p class="text-sm text-gray-600">Umur: {{ $balita->birth_date->diffInMonths(now()) }} bulan</p>
+                <p class="text-sm text-gray-600">Umur: {{ $balita->age_months }} bulan</p>
                 <p class="text-sm text-gray-600">Jenis Kelamin: {{ $balita->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
             </div>
         </div>

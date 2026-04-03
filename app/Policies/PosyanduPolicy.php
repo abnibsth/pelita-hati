@@ -27,7 +27,7 @@ class PosyanduPolicy
         }
 
         // Load kelurahan with kecamatan if not already loaded
-        if (!$posyandu->relationLoaded('kelurahan')) {
+        if (! $posyandu->relationLoaded('kelurahan')) {
             $posyandu->load('kelurahan.kecamatan');
         }
 

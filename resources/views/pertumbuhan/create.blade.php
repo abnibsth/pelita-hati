@@ -32,7 +32,7 @@ $pertumbuhanPrefix = "$routePrefix.pertumbuhan";
             </div>
             <div>
                 <p class="font-semibold">{{ $balita->name }}</p>
-                <p class="text-sm text-gray-600">Umur: {{ $balita->birth_date->diffInMonths(now()) }} bulan | {{ $balita->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+                <p class="text-sm text-gray-600">Umur: {{ $balita->age_months }} bulan | {{ $balita->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
             </div>
         </div>
     </div>

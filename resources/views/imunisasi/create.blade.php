@@ -30,7 +30,7 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
                 </div>
                 <div>
                     <p class="font-semibold">{{ $balita->name }}</p>
-                    <p class="text-sm text-gray-600">NIK: {{ $balita->nik }} | Umur: {{ $balita->birth_date->diffInMonths(now()) }} bulan</p>
+                    <p class="text-sm text-gray-600">NIK: {{ $balita->nik }} | Umur: {{ $balita->age_months }} bulan</p>
                 </div>
             </div>
         </div>

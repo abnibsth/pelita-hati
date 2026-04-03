@@ -114,7 +114,7 @@ $posyanduPrefix = "$routePrefix.posyandu";
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="jadwal_jam_mulai" class="block text-sm font-medium text-gray-700">Jam Mulai <span class="text-red-500">*</span></label>
-                        <input type="time" name="jadwal_jam_mulai" id="jadwal_jam_mulai" value="{{ old('jadwal_jam_mulai', $posyandu->jadwal_jam_mulai?->format('H:i')) }}" required
+                        <input type="time" name="jadwal_jam_mulai" id="jadwal_jam_mulai" value="{{ old('jadwal_jam_mulai', $posyandu->jadwal_jam_mulai) }}" required
                             class="mt-1 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('jadwal_jam_mulai') border-red-500 @enderror">
                         @error('jadwal_jam_mulai')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -123,7 +123,7 @@ $posyanduPrefix = "$routePrefix.posyandu";
 
                     <div>
                         <label for="jadwal_jam_selesai" class="block text-sm font-medium text-gray-700">Jam Selesai <span class="text-red-500">*</span></label>
-                        <input type="time" name="jadwal_jam_selesai" id="jadwal_jam_selesai" value="{{ old('jadwal_jam_selesai', $posyandu->jadwal_jam_selesai?->format('H:i')) }}" required
+                        <input type="time" name="jadwal_jam_selesai" id="jadwal_jam_selesai" value="{{ old('jadwal_jam_selesai', $posyandu->jadwal_jam_selesai) }}" required
                             class="mt-1 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('jadwal_jam_selesai') border-red-500 @enderror">
                         @error('jadwal_jam_selesai')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>

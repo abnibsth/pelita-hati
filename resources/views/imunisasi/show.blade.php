@@ -57,7 +57,7 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
 
             <div>
                 <label class="block text-sm font-medium text-gray-500">Umur Saat Imunisasi</label>
-                <p class="mt-1 text-base text-gray-900">{{ $record->balita->birth_date->diffInMonths($record->tanggal) }} bulan</p>
+                <p class="mt-1 text-base text-gray-900">{{ $record->balita->age_months }} bulan</p>
             </div>
 
             <div class="md:col-span-2">

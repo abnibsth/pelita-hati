@@ -65,7 +65,7 @@
                             <p class="font-medium text-gray-900">{{ $balita->name }}</p>
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-600">{{ $balita->nik }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $balita->birth_date->diffInMonths(now()) }} bulan</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ $balita->age_months }} bulan</td>
                         <td class="px-4 py-3">
                             <x-badge :color="$balita->gender === 'L' ? 'blue' : 'purple'">
                                 {{ $balita->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}

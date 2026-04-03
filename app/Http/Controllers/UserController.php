@@ -188,6 +188,43 @@ class UserController extends Controller
     }
 
     /**
+     * Show profile edit form for authenticated user (especially for orangtua)
+     */
+    public function editProfile()
+    {
+        $user = auth()->user();
+
+        return view('orangtua.profile.edit', compact('user'));
+    }
+
+    /**
+     * Update profile for authenticated user (especially for orangtua)
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'password' => ['nullable', 'confirmed', 'min:8'],
+            'nik' => 'required|string|size:16|unique:users,nik,'.$user->id,
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        if (! empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('orangtua.profile.edit')
+            ->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    /**
      * Get available roles based on auth user role
      */
     private function getAvailableRoles($user): array

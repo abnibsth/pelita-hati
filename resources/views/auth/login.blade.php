@@ -68,7 +68,11 @@
 
     <div class="mt-4 space-y-2 text-xs text-gray-600">
         <p><strong>Admin Kota:</strong> admin.kota@jakarta.go.id / password123</p>
+        <p><strong>Admin Kecamatan:</strong> admin.kecamatan@jakarta.go.id / password123</p>
+        <p><strong>Admin Kelurahan:</strong> admin.kelurahan@jakarta.go.id / password123</p>
+        <p><strong>Nakes Puskesmas:</strong> nakes@jakarta.go.id / password123</p>
         <p><strong>Kader:</strong> kader.melati1@jakarta.go.id / password123</p>
+        <p><strong>Orangtua:</strong> orangtua@jakarta.go.id / password123</p>
     </div>
 </div>
 @endsection

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Balita;
+use App\Models\PertumbuhanRecord;
 use App\Models\Posyandu;
 use App\Services\GiziCalculator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -33,13 +35,22 @@ class BalitaController extends Controller
         } elseif ($user->role === 'admin_kelurahan') {
             $query->whereHas('posyandu', function ($q) use ($user) {
                 $q->where('kelurahan_id', $user->kelurahan_id);
-            });
+            })
+                ->with(['pertumbuhanRecords' => function ($q) {
+                    $q->orderBy('tanggal', 'desc')->limit(1);
+                }]);
         } elseif ($user->role === 'admin_kecamatan') {
             $query->whereHas('posyandu.kelurahan', function ($q) use ($user) {
                 $q->where('kecamatan_id', $user->kecamatan_id);
-            });
+            })
+                ->with(['pertumbuhanRecords' => function ($q) {
+                    $q->orderBy('tanggal', 'desc')->limit(1);
+                }]);
         } elseif ($user->role === 'orangtua') {
-            $query->where('user_id', $user->id);
+            $query->where('user_id', $user->id)
+                ->with(['posyandu.kelurahan.kecamatan', 'pertumbuhanRecords' => function ($q) {
+                    $q->orderBy('tanggal', 'desc')->limit(1);
+                }]);
         }
 
         // Search
@@ -58,6 +69,47 @@ class BalitaController extends Controller
         }
 
         $balitas = $query->orderBy('name', 'asc')->paginate(15);
+
+        // Use different view for orangtua
+        if ($user->role === 'orangtua') {
+            return view('orangtua.anak.index', compact('balitas'));
+        }
+
+        // For admin_kecamatan and admin_kelurahan, add status gizi stats
+        if (in_array($user->role, ['admin_kecamatan', 'admin_kelurahan'])) {
+            $posyanduIds = [];
+
+            if ($user->role === 'admin_kecamatan') {
+                $kecamatan = $user->kecamatan;
+                $posyanduIds = Posyandu::whereIn('kelurahan_id', $kecamatan->kelurahans->pluck('id'))->pluck('id');
+            } else {
+                $kelurahan = $user->kelurahan;
+                $posyanduIds = Posyandu::where('kelurahan_id', $kelurahan->id)->pluck('id');
+            }
+
+            $latestRecords = PertumbuhanRecord::select('pertumbuhan_records.*')
+                ->join('balitas', 'pertumbuhan_records.balita_id', '=', 'balitas.id')
+                ->whereIn('balitas.posyandu_id', $posyanduIds)
+                ->where('balitas.status', 'aktif')
+                ->orderBy('pertumbuhan_records.tanggal', 'desc')
+                ->get()
+                ->groupBy('balita_id')
+                ->map(fn ($records) => $records->first());
+
+            $statusGizi = [
+                'normal' => $latestRecords->where('status_gizi', 'normal')->count(),
+                'kurang' => $latestRecords->where('status_gizi', 'kurang')->count(),
+                'lebih' => $latestRecords->where('status_gizi', 'lebih')->count(),
+                'gizi_buruk' => $latestRecords->where('status_gizi', 'gizi_buruk')->count(),
+                'stunting' => $latestRecords->where('status_gizi', 'stunting')->count(),
+            ];
+
+            if ($user->role === 'admin_kecamatan') {
+                return view('admin-kecamatan.balita.index', compact('balitas', 'statusGizi', 'kecamatan'));
+            } else {
+                return view('admin-kelurahan.balita.index', compact('balitas', 'statusGizi', 'kelurahan'));
+            }
+        }
 
         return view('balita.index', compact('balitas'));
     }
@@ -100,6 +152,10 @@ class BalitaController extends Controller
         $validated['registration_date'] = now();
         $validated['status'] = 'aktif';
 
+        // Calculate and store age in months at registration
+        $birthDate = Carbon::parse($validated['birth_date']);
+        $validated['age_months'] = $birthDate->diffInMonths(now());
+
         Balita::create($validated);
 
         return redirect()->route($this->getBalitaIndexRoute())
@@ -112,6 +168,8 @@ class BalitaController extends Controller
     public function show(Balita $balita)
     {
         Gate::authorize('view', $balita);
+
+        $user = Auth::user();
 
         $balita->load([
             'pertumbuhanRecords' => function ($q) {
@@ -139,6 +197,11 @@ class BalitaController extends Controller
             'tinggi_badan' => $balita->pertumbuhanRecords->sortBy('tanggal')
                 ->map(fn ($r) => $r->tinggi_badan),
         ];
+
+        // Use different view for orangtua
+        if ($user->role === 'orangtua') {
+            return view('orangtua.anak.show', compact('balita', 'latestGrowth', 'growthTrend'));
+        }
 
         return view('balita.show', compact('balita', 'latestGrowth', 'growthTrend'));
     }

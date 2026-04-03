@@ -16,9 +16,9 @@ class KehadiranController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Only kader can access this - check if user has posyandu
-        if (!$user->posyandu) {
+        if (! $user->posyandu) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -35,11 +35,11 @@ class KehadiranController extends Controller
         $endDate = now()->endOfMonth();
 
         $kehadiranSummary = Kehadiran::select(
-                'tanggal',
-                DB::raw('COUNT(CASE when hadir = 1 THEN 1 END) as total_hadir'),
-                DB::raw('COUNT(CASE when hadir = 0 THEN 1 END) as total_tidak_hadir'),
-                DB::raw('COUNT(*) as total')
-            )
+            'tanggal',
+            DB::raw('COUNT(CASE when hadir = 1 THEN 1 END) as total_hadir'),
+            DB::raw('COUNT(CASE when hadir = 0 THEN 1 END) as total_tidak_hadir'),
+            DB::raw('COUNT(*) as total')
+        )
             ->whereHas('balita', function ($q) use ($posyandu) {
                 $q->where('posyandu_id', $posyandu->id);
             })
@@ -48,36 +48,37 @@ class KehadiranController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get()
             ->map(function ($item) {
-                $item->persentase = $item->total > 0 
-                    ? ($item->total_hadir / $item->total) * 100 
+                $item->persentase = $item->total > 0
+                    ? ($item->total_hadir / $item->total) * 100
                     : 0;
+
                 return $item;
             });
 
         // Calculate statistics
         $totalBalita = $balitas->count();
-        
+
         $totalKehadiranBulanIni = Kehadiran::whereHas('balita', function ($q) use ($posyandu) {
-                $q->where('posyandu_id', $posyandu->id);
-            })
+            $q->where('posyandu_id', $posyandu->id);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->count();
 
         $totalHadirBulanIni = Kehadiran::whereHas('balita', function ($q) use ($posyandu) {
-                $q->where('posyandu_id', $posyandu->id);
-            })
+            $q->where('posyandu_id', $posyandu->id);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->where('hadir', 1)
             ->count();
 
-        $avgKehadiran = $totalKehadiranBulanIni > 0 
-            ? ($totalHadirBulanIni / $totalKehadiranBulanIni) * 100 
+        $avgKehadiran = $totalKehadiranBulanIni > 0
+            ? ($totalHadirBulanIni / $totalKehadiranBulanIni) * 100
             : 0;
 
         // Count frequency of posyandu this month (unique dates)
         $frekuensiPosyandu = Kehadiran::whereHas('balita', function ($q) use ($posyandu) {
-                $q->where('posyandu_id', $posyandu->id);
-            })
+            $q->where('posyandu_id', $posyandu->id);
+        })
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->distinct('tanggal')
             ->count('tanggal');
@@ -97,9 +98,9 @@ class KehadiranController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        
+
         // Only kader can access this - check if user has posyandu
-        if (!$user->posyandu) {
+        if (! $user->posyandu) {
             abort(403, 'Unauthorized access.');
         }
 

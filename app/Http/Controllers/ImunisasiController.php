@@ -11,15 +11,63 @@ use Illuminate\Support\Facades\Gate;
 class ImunisasiController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource for nakes puskesmas.
      */
-    public function index(Request $request, Balita $balita)
+    public function index(Request $request)
     {
-        Gate::authorize('view', $balita);
+        $user = Auth::user();
 
+        // Only nakes puskesmas can access this
+        if ($user->role !== 'nakes_puskesmas') {
+            abort(403, 'Unauthorized access');
+        }
+
+        $puskesmas = $user->puskesmas;
+
+        // Get all imunisasi records in puskesmas area
+        $query = ImunisasiRecord::whereHas('balita.posyandu.kelurahan', function ($q) use ($puskesmas) {
+            $q->where('kecamatan_id', $puskesmas->kecamatan_id);
+        })
+            ->with(['balita.posyandu.kelurahan', 'inputBy'])
+            ->orderBy('tanggal_diberikan', 'desc');
+
+        // Filter
+        if ($request->has('jenis_imunisasi')) {
+            $query->where('jenis_imunisasi', $request->jenis_imunisasi);
+        }
+
+        if ($request->has('bulan')) {
+            $query->whereMonth('tanggal_diberikan', $request->bulan);
+        }
+
+        $records = $query->paginate(20);
+
+        return view('nakes.imunisasi.index', compact('records', 'puskesmas'));
+    }
+
+    /**
+     * Display a listing of the resource for specific balita.
+     */
+    public function indexByBalita(Balita $balita)
+    {
+        $user = Auth::user();
+
+        // Load balita with relationships for policy check
+        $balita->load(['posyandu.kelurahan.kecamatan', 'orangtua']);
+
+        if (! Gate::allows('view', $balita)) {
+            abort(403, 'Anda tidak memiliki akses untuk melihat data imunisasi anak ini.');
+        }
+
+        // Load immunization records
         $records = ImunisasiRecord::where('balita_id', $balita->id)
             ->orderBy('tanggal_diberikan', 'desc')
-            ->paginate(10);
+            ->get();
+
+        // Use different view for orangtua
+        if ($user->role === 'orangtua') {
+            return view('orangtua.anak.imunisasi.index', compact('balita', 'records'));
+        }
 
         return view('imunisasi.index', compact('balita', 'records'));
     }

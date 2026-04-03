@@ -26,6 +26,7 @@ class Balita extends Model
         'user_id',
         'status',
         'registration_date',
+        'age_months',
     ];
 
     protected function casts(): array
@@ -76,7 +77,8 @@ class Balita extends Model
     // Accessors
     public function getAgeAttribute(): int
     {
-        return $this->birth_date->diffInMonths(now());
+        // Return stored age_months if available, otherwise calculate from birth_date
+        return $this->age_months ?? $this->birth_date->diffInMonths(now());
     }
 
     public function getAgeInYearsAttribute(): float

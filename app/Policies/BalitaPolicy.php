@@ -59,8 +59,8 @@ class BalitaPolicy
      */
     public function create(User $user): bool
     {
-        // Only kader and admin kelurahan can create balitas
-        return in_array($user->role, ['kader', 'admin_kelurahan']);
+        // Admin kecamatan, admin kelurahan, and kader can create balitas
+        return in_array($user->role, ['admin_kecamatan', 'admin_kelurahan', 'kader']);
     }
 
     /**

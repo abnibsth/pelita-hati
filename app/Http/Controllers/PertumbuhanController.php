@@ -25,9 +25,16 @@ class PertumbuhanController extends Controller
     {
         Gate::authorize('view', $balita);
 
+        $user = Auth::user();
+
         $records = PertumbuhanRecord::where('balita_id', $balita->id)
             ->orderBy('tanggal', 'desc')
             ->paginate(10);
+
+        // Use different view for orangtua
+        if ($user->role === 'orangtua') {
+            return view('orangtua.anak.pertumbuhan.index', compact('balita', 'records'));
+        }
 
         return view('pertumbuhan.index', compact('balita', 'records'));
     }

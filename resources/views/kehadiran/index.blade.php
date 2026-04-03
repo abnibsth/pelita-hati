@@ -56,7 +56,7 @@ $posyandu = auth()->user()->posyandu;
                                 <p class="font-medium text-gray-900">{{ $balita->name }}</p>
                                 <p class="text-xs text-gray-500">NIK: {{ $balita->nik }}</p>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $balita->birth_date->diffInMonths(now()) }} bulan</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $balita->age_months }} bulan</td>
                             <td class="px-4 py-3 text-center">
                                 <input type="checkbox" name="hadir[{{ $balita->id }}]" value="1" 
                                     class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">

@@ -109,9 +109,9 @@ class PosyanduController extends Controller
     public function showMyPosyandu()
     {
         $user = auth()->user();
-        
+
         // Ensure user is kader and has posyandu
-        if (!$user->posyandu_id) {
+        if (! $user->posyandu_id) {
             abort(403, 'Anda belum ditugaskan ke posyandu manapun.');
         }
 
@@ -123,7 +123,7 @@ class PosyanduController extends Controller
             },
         ])->find($user->posyandu_id);
 
-        if (!$posyandu) {
+        if (! $posyandu) {
             abort(404, 'Posyandu tidak ditemukan.');
         }
 
@@ -174,6 +174,16 @@ class PosyanduController extends Controller
 
         $posyandu->update($validated);
 
+        // Redirect based on user role
+        $user = auth()->user();
+        if ($user->role === 'admin_kecamatan') {
+            return redirect()->route('admin-kecamatan.posyandu.show', $posyandu)
+                ->with('success', 'Data posyandu berhasil diperbarui.');
+        } elseif ($user->role === 'admin_kelurahan') {
+            return redirect()->route('admin-kelurahan.posyandu.show', $posyandu)
+                ->with('success', 'Data posyandu berhasil diperbarui.');
+        }
+
         return redirect()->route('posyandu.show', $posyandu)
             ->with('success', 'Data posyandu berhasil diperbarui.');
     }
@@ -197,14 +207,14 @@ class PosyanduController extends Controller
     public function editMyPosyandu()
     {
         $user = auth()->user();
-        
-        if (!$user->posyandu_id) {
+
+        if (! $user->posyandu_id) {
             abort(403, 'Anda belum ditugaskan ke posyandu manapun.');
         }
 
         $posyandu = Posyandu::find($user->posyandu_id);
 
-        if (!$posyandu) {
+        if (! $posyandu) {
             abort(404, 'Posyandu tidak ditemukan.');
         }
 
@@ -222,14 +232,14 @@ class PosyanduController extends Controller
     public function updateMyPosyandu(Request $request)
     {
         $user = auth()->user();
-        
-        if (!$user->posyandu_id) {
+
+        if (! $user->posyandu_id) {
             abort(403, 'Anda belum ditugaskan ke posyandu manapun.');
         }
 
         $posyandu = Posyandu::find($user->posyandu_id);
 
-        if (!$posyandu) {
+        if (! $posyandu) {
             abort(404, 'Posyandu tidak ditemukan.');
         }
 

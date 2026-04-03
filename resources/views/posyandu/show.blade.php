@@ -102,7 +102,7 @@ $posyanduPrefix = "$routePrefix.posyandu";
                         <p class="text-sm text-gray-500">{{ $balita->mother_name }}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-medium">{{ $balita->birth_date->diffInMonths(now()) }} bulan</p>
+                        <p class="text-sm font-medium">{{ $balita->age_months }} bulan</p>
                         <x-badge :color="$balita->gender === 'L' ? 'blue' : 'purple'">{{ $balita->gender }}</x-badge>
                     </div>
                 </a>

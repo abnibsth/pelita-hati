@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
         // Admin Kecamatan Gambir
         User::create([
             'name' => 'Admin Kecamatan Gambir',
-            'email' => 'admin.kec.gambir@jakarta.go.id',
+            'email' => 'admin.kecamatan@jakarta.go.id',
             'password' => Hash::make('password123'),
             'role' => 'admin_kecamatan',
             'nik' => '3171010101010002',
@@ -36,10 +36,22 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        // Admin Kecamatan (old email - for backward compatibility)
+        User::create([
+            'name' => 'Admin Kecamatan Gambir (Backup)',
+            'email' => 'admin.kec.gambir@jakarta.go.id',
+            'password' => Hash::make('password123'),
+            'role' => 'admin_kecamatan',
+            'nik' => '3171010101010092',
+            'phone' => '021-12345679',
+            'kecamatan_id' => 1,
+            'email_verified_at' => now(),
+        ]);
+
         // Admin Kelurahan Gambir
         User::create([
             'name' => 'Admin Kelurahan Gambir',
-            'email' => 'admin.kel.gambir@jakarta.go.id',
+            'email' => 'admin.kelurahan@jakarta.go.id',
             'password' => Hash::make('password123'),
             'role' => 'admin_kelurahan',
             'nik' => '3171010101010003',
@@ -63,7 +75,7 @@ class UserSeeder extends Seeder
         // Nakes Puskesmas Gambir
         User::create([
             'name' => 'Nakes Puskesmas Gambir',
-            'email' => 'nakes.gambir@jakarta.go.id',
+            'email' => 'nakes@jakarta.go.id',
             'password' => Hash::make('password123'),
             'role' => 'nakes_puskesmas',
             'nik' => '3171010101010005',
@@ -108,6 +120,17 @@ class UserSeeder extends Seeder
             'phone' => '021-12345685',
             'kelurahan_id' => 2,
             'posyandu_id' => 3,
+            'email_verified_at' => now(),
+        ]);
+
+        // Orangtua
+        User::create([
+            'name' => 'Orangtua Demo',
+            'email' => 'orangtua@jakarta.go.id',
+            'password' => Hash::make('password123'),
+            'role' => 'orangtua',
+            'nik' => '3171010101010009',
+            'phone' => '021-12345686',
             'email_verified_at' => now(),
         ]);
     }

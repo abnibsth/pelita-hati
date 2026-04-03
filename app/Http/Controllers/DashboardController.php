@@ -82,6 +82,11 @@ class DashboardController extends Controller
         $user = Auth::user();
         $kecamatan = $user->kecamatan;
 
+        // Check if kecamatan exists
+        if (! $kecamatan) {
+            abort(403, 'User tidak memiliki kecamatan yang valid. Silakan hubungi administrator.');
+        }
+
         $totalKelurahan = $kecamatan->kelurahans->count();
         $totalPosyandu = Posyandu::whereIn('kelurahan_id', $kecamatan->kelurahans->pluck('id'))->count();
         $totalBalita = Balita::whereHas('posyandu', function ($q) use ($kecamatan) {
@@ -252,6 +257,57 @@ class DashboardController extends Controller
         // SKDN bulan ini
         $skdn = $this->reportGenerator->generateSKDN($posyandu, now()->month, now()->year);
 
+        // Kehadiran summary for current month
+        $startDate = now()->startOfMonth();
+        $endDate = now()->endOfMonth();
+
+        $kehadiranSummary = Kehadiran::select(
+            'tanggal',
+            DB::raw('COUNT(CASE when hadir = 1 THEN 1 END) as total_hadir'),
+            DB::raw('COUNT(CASE when hadir = 0 THEN 1 END) as total_tidak_hadir'),
+            DB::raw('COUNT(*) as total')
+        )
+            ->whereHas('balita', function ($q) use ($posyandu) {
+                $q->where('posyandu_id', $posyandu->id);
+            })
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                $item->persentase = $item->total > 0
+                    ? ($item->total_hadir / $item->total) * 100
+                    : 0;
+
+                return $item;
+            });
+
+        // Calculate attendance statistics
+        $totalKehadiranBulanIni = Kehadiran::whereHas('balita', function ($q) use ($posyandu) {
+            $q->where('posyandu_id', $posyandu->id);
+        })
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->count();
+
+        $totalHadirBulanIni = Kehadiran::whereHas('balita', function ($q) use ($posyandu) {
+            $q->where('posyandu_id', $posyandu->id);
+        })
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->where('hadir', 1)
+            ->count();
+
+        $avgKehadiran = $totalKehadiranBulanIni > 0
+            ? ($totalHadirBulanIni / $totalKehadiranBulanIni) * 100
+            : 0;
+
+        $frekuensiPosyandu = Kehadiran::whereHas('balita', function ($q) use ($posyandu) {
+            $q->where('posyandu_id', $posyandu->id);
+        })
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->distinct('tanggal')
+            ->count('tanggal');
+
         return view('dashboards.kader', compact(
             'posyandu',
             'totalBalita',
@@ -259,7 +315,10 @@ class DashboardController extends Controller
             'statusGizi',
             'jadwalBerikutnya',
             'giziBurukBalitas',
-            'skdn'
+            'skdn',
+            'kehadiranSummary',
+            'avgKehadiran',
+            'frekuensiPosyandu'
         ));
     }
 
@@ -272,7 +331,7 @@ class DashboardController extends Controller
 
         $balitas = Balita::where('user_id', $user->id)
             ->where('status', 'aktif')
-            ->with(['pertumbuhanRecords' => function ($q) {
+            ->with(['posyandu.kelurahan.kecamatan', 'pertumbuhanRecords' => function ($q) {
                 $q->orderBy('tanggal', 'desc')->limit(1);
             }, 'imunisasiRecords'])
             ->get();
