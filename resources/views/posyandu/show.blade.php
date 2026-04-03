@@ -26,13 +26,22 @@ $posyanduPrefix = "$routePrefix.posyandu";
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-bold">{{ $posyandu->name }}</h2>
-                <p class="text-primary-100 mt-1">{{ $posyandu->address }}</p>
-                <p class="text-sm text-primary-100 mt-2">{{ $posyandu->kelurahan->name }}, {{ $posyandu->kelurahan->kecamatan->name }}</p>
+                <p class="text-primary-100 mt-1">{{ $posyandu->address ?? '-' }}</p>
+                <p class="text-sm text-primary-100 mt-2">
+                    {{ $posyandu->kelurahan->name ?? 'Kelurahan tidak diketahui' }}, 
+                    {{ $posyandu->kelurahan->kecamatan->name ?? 'Kecamatan tidak diketahui' }}
+                </p>
             </div>
             <div class="text-right">
                 <p class="text-primary-100 text-sm">Jadwal Tetap</p>
                 <p class="font-semibold text-lg">Minggu ke-{{ $posyandu->jadwal_minggu_ke }}, {{ $posyandu->jadwal_hari }}</p>
-                <p class="text-sm">{{ $posyandu->jadwal_jam_mulai }} - {{ $posyandu->jadwal_jam_selesai }}</p>
+                <p class="text-sm">
+                    @php
+                        $jamMulai = $posyandu->jadwal_jam_mulai ? \Carbon\Carbon::parse($posyandu->jadwal_jam_mulai)->format('H:i') : '-';
+                        $jamSelesai = $posyandu->jadwal_jam_selesai ? \Carbon\Carbon::parse($posyandu->jadwal_jam_selesai)->format('H:i') : '-';
+                    @endphp
+                    {{ $jamMulai }} - {{ $jamSelesai }}
+                </p>
             </div>
         </div>
     </div>
@@ -58,9 +67,9 @@ $posyanduPrefix = "$routePrefix.posyandu";
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Kader Aktif -->
         <x-card title="Kader Aktif">
-            @if($posyandu->users->count() > 0)
+            @if($kaders->count() > 0)
             <div class="space-y-3">
-                @foreach($posyandu->users as $kader)
+                @foreach($kaders as $kader)
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
@@ -68,7 +77,7 @@ $posyanduPrefix = "$routePrefix.posyandu";
                         </div>
                         <div>
                             <p class="font-medium">{{ $kader->name }}</p>
-                            <p class="text-sm text-gray-500">{{ $kader->phone }}</p>
+                            <p class="text-sm text-gray-500">{{ $kader->phone ?? '-' }}</p>
                         </div>
                     </div>
                     @if($kader->id === $posyandu->kader_koordinator_id)

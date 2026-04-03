@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BalitaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImunisasiController;
+use App\Http\Controllers\KehadiranController;
 use App\Http\Controllers\KecamatanController;
 use App\Http\Controllers\KelurahanController;
 use App\Http\Controllers\PertumbuhanController;
@@ -59,6 +60,8 @@ Route::middleware('auth')->group(function () {
         
         // Data Balita (View All Jakarta)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
+        Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
+        Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
@@ -85,6 +88,8 @@ Route::middleware('auth')->group(function () {
         
         // Data Balita (View all in their kecamatan)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
+        Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
+        Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
@@ -113,6 +118,8 @@ Route::middleware('auth')->group(function () {
         
         // Data Balita (View all in their kelurahan)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
+        Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
+        Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
@@ -158,9 +165,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'kader'])->name('dashboard');
         
         // Posyandu Profile (their posyandu only)
-        Route::get('/posyandu', [PosyanduController::class, 'show'])->name('posyandu.show');
-        Route::get('/posyandu/edit', [PosyanduController::class, 'edit'])->name('posyandu.edit');
-        Route::put('/posyandu', [PosyanduController::class, 'update'])->name('posyandu.update');
+        Route::get('/posyandu', [PosyanduController::class, 'showMyPosyandu'])->name('posyandu.show');
+        Route::get('/posyandu/edit', [PosyanduController::class, 'editMyPosyandu'])->name('posyandu.edit');
+        Route::put('/posyandu', [PosyanduController::class, 'updateMyPosyandu'])->name('posyandu.update');
         
         // Data Balita (CRUD for their posyandu)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
@@ -185,11 +192,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/balita/{balita}/imunisasi/create', [ImunisasiController::class, 'create'])->name('imunisasi.create');
         Route::post('/balita/{balita}/imunisasi', [ImunisasiController::class, 'store'])->name('imunisasi.store');
         Route::get('/imunisasi/{record}', [ImunisasiController::class, 'show'])->name('imunisasi.show');
-        
-        // Kehadiran (Attendance) - placeholder for now
-        Route::get('/kehadiran', function() { return view('dashboards.kader'); })->name('kehadiran.index');
-        Route::post('/kehadiran', function() { return redirect()->back(); })->name('kehadiran.store');
-        
+
+        // Kehadiran (Attendance)
+        Route::get('/kehadiran', [KehadiranController::class, 'index'])->name('kehadiran.index');
+        Route::post('/kehadiran', [KehadiranController::class, 'store'])->name('kehadiran.store');
+
         // Reports
         Route::get('/reports/skdn', [DashboardController::class, 'kader'])->name('reports.skdn');
     });

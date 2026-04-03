@@ -102,7 +102,7 @@ class BalitaController extends Controller
 
         Balita::create($validated);
 
-        return redirect()->route('balita.index')
+        return redirect()->route($this->getBalitaIndexRoute())
             ->with('success', 'Data balita berhasil ditambahkan.');
     }
 
@@ -181,7 +181,7 @@ class BalitaController extends Controller
 
         $balita->update($validated);
 
-        return redirect()->route('balita.show', $balita)
+        return redirect()->route($this->getBalitaIndexRoute())
             ->with('success', 'Data balita berhasil diperbarui.');
     }
 
@@ -194,7 +194,7 @@ class BalitaController extends Controller
 
         $balita->delete();
 
-        return redirect()->route('balita.index')
+        return redirect()->route($this->getBalitaIndexRoute())
             ->with('success', 'Data balita berhasil dihapus.');
     }
 
@@ -216,5 +216,22 @@ class BalitaController extends Controller
         }
 
         return collect();
+    }
+
+    /**
+     * Get balita index route based on user role
+     */
+    private function getBalitaIndexRoute()
+    {
+        $user = Auth::user();
+
+        return match ($user->role) {
+            'admin_kota' => 'admin-kota.balita.index',
+            'admin_kecamatan' => 'admin-kecamatan.balita.index',
+            'admin_kelurahan' => 'admin-kelurahan.balita.index',
+            'kader' => 'kader.balita.index',
+            'orangtua' => 'orangtua.anak.index',
+            default => 'balita.index',
+        };
     }
 }

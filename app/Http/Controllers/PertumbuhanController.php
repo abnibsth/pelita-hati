@@ -78,7 +78,7 @@ class PertumbuhanController extends Controller
         }
         $result->save();
 
-        return redirect()->route('balita.show', $balita)
+        return redirect()->route($this->getBalitaShowRoute($balita))
             ->with('success', 'Data pertumbuhan berhasil ditambahkan. Status gizi: '.strtoupper($result->status_gizi));
     }
 
@@ -141,7 +141,7 @@ class PertumbuhanController extends Controller
             'catatan' => $validated['catatan'] ?? null,
         ]);
 
-        return redirect()->route('balita.show', $record->balita)
+        return redirect()->route($this->getBalitaShowRoute($record->balita))
             ->with('success', 'Data pertumbuhan berhasil diperbarui.');
     }
 
@@ -155,7 +155,24 @@ class PertumbuhanController extends Controller
         $balita = $record->balita;
         $record->delete();
 
-        return redirect()->route('balita.show', $balita)
+        return redirect()->route($this->getBalitaShowRoute($balita))
             ->with('success', 'Data pertumbuhan berhasil dihapus.');
+    }
+
+    /**
+     * Get balita show route based on user role
+     */
+    private function getBalitaShowRoute($balita)
+    {
+        $user = Auth::user();
+
+        return match ($user->role) {
+            'admin_kota' => 'admin-kota.balita.show',
+            'admin_kecamatan' => 'admin-kecamatan.balita.show',
+            'admin_kelurahan' => 'admin-kelurahan.balita.show',
+            'kader' => 'kader.balita.show',
+            'orangtua' => 'orangtua.anak.show',
+            default => 'balita.show',
+        };
     }
 }

@@ -27,8 +27,6 @@ class Posyandu extends Model
     {
         return [
             'jadwal_minggu_ke' => 'integer',
-            'jadwal_jam_mulai' => 'datetime:H:i',
-            'jadwal_jam_selesai' => 'datetime:H:i',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

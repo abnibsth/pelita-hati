@@ -91,16 +91,50 @@ class PosyanduController extends Controller
             'balitas' => function ($q) {
                 $q->where('status', 'aktif')->orderBy('name');
             },
-            'users' => function ($q) {
-                $q->where('role', 'kader');
-            },
         ]);
 
-        // Get statistics
-        $totalBalita = $posyandu->balitas()->where('status', 'aktif')->count();
-        $totalKader = $posyandu->users()->where('role', 'kader')->count();
+        // Load kader separately with proper filtering
+        $kaders = $posyandu->users()->where('role', 'kader')->get();
 
-        return view('posyandu.show', compact('posyandu', 'totalBalita', 'totalKader'));
+        // Get statistics - use already loaded relationships
+        $totalBalita = $posyandu->balitas->count();
+        $totalKader = $kaders->count();
+
+        return view('posyandu.show', compact('posyandu', 'totalBalita', 'totalKader', 'kaders'));
+    }
+
+    /**
+     * Display the authenticated user's posyandu (for Kader).
+     */
+    public function showMyPosyandu()
+    {
+        $user = auth()->user();
+        
+        // Ensure user is kader and has posyandu
+        if (!$user->posyandu_id) {
+            abort(403, 'Anda belum ditugaskan ke posyandu manapun.');
+        }
+
+        $posyandu = Posyandu::with([
+            'kelurahan.kecamatan',
+            'kaderKoordinator',
+            'balitas' => function ($q) {
+                $q->where('status', 'aktif')->orderBy('name');
+            },
+        ])->find($user->posyandu_id);
+
+        if (!$posyandu) {
+            abort(404, 'Posyandu tidak ditemukan.');
+        }
+
+        // Load kader separately
+        $kaders = $posyandu->users()->where('role', 'kader')->get();
+
+        // Get statistics
+        $totalBalita = $posyandu->balitas->count();
+        $totalKader = $kaders->count();
+
+        return view('posyandu.my-posyandu', compact('posyandu', 'totalBalita', 'totalKader', 'kaders'));
     }
 
     /**
@@ -155,6 +189,66 @@ class PosyanduController extends Controller
 
         return redirect()->route('posyandu.index')
             ->with('success', 'Posyandu berhasil dihapus.');
+    }
+
+    /**
+     * Show the form for editing user's own posyandu (for Kader).
+     */
+    public function editMyPosyandu()
+    {
+        $user = auth()->user();
+        
+        if (!$user->posyandu_id) {
+            abort(403, 'Anda belum ditugaskan ke posyandu manapun.');
+        }
+
+        $posyandu = Posyandu::find($user->posyandu_id);
+
+        if (!$posyandu) {
+            abort(404, 'Posyandu tidak ditemukan.');
+        }
+
+        $kelurahans = $this->getAvailableKelurahans($user);
+        $kaders = User::where('role', 'kader')
+            ->where('kelurahan_id', $posyandu->kelurahan_id)
+            ->get();
+
+        return view('posyandu.edit', compact('posyandu', 'kelurahans', 'kaders'));
+    }
+
+    /**
+     * Update user's own posyandu (for Kader).
+     */
+    public function updateMyPosyandu(Request $request)
+    {
+        $user = auth()->user();
+        
+        if (!$user->posyandu_id) {
+            abort(403, 'Anda belum ditugaskan ke posyandu manapun.');
+        }
+
+        $posyandu = Posyandu::find($user->posyandu_id);
+
+        if (!$posyandu) {
+            abort(404, 'Posyandu tidak ditemukan.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:posyandus,code,'.$posyandu->id,
+            'kelurahan_id' => 'required|exists:kelurahans,id',
+            'address' => 'nullable|string',
+            'jadwal_minggu_ke' => 'required|in:1,2,3,4',
+            'jadwal_hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'jadwal_jam_mulai' => 'required|date_format:H:i',
+            'jadwal_jam_selesai' => 'required|date_format:H:i|after:jadwal_jam_mulai',
+            'kader_koordinator_id' => 'nullable|exists:users,id',
+        ]);
+
+        $posyandu->update($validated);
+
+        return redirect()->route('kader.posyandu.show')
+            ->with('success', 'Data posyandu berhasil diperbarui.');
     }
 
     /**

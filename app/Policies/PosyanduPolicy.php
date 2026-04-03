@@ -26,9 +26,14 @@ class PosyanduPolicy
             return true;
         }
 
+        // Load kelurahan with kecamatan if not already loaded
+        if (!$posyandu->relationLoaded('kelurahan')) {
+            $posyandu->load('kelurahan.kecamatan');
+        }
+
         // Admin Kecamatan can view within their kecamatan
         if ($user->role === 'admin_kecamatan') {
-            return $user->kecamatan_id === $posyandu->kelurahan->kecamatan_id;
+            return $user->kecamatan_id === $posyandu->kelurahan?->kecamatan_id;
         }
 
         // Admin Kelurahan can view within their kelurahan
