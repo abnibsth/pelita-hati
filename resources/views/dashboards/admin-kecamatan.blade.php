@@ -9,7 +9,7 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Statistik Kecamatan -->
+    {{-- Statistik Kecamatan --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <x-stat-card
             title="Kelurahan"
@@ -61,7 +61,7 @@
         </x-stat-card>
     </div>
 
-    <!-- Status Gizi -->
+    {{-- Status Gizi --}}
     <x-card title="📊 Distribusi Status Gizi - {{ $kecamatan->name }}">
         <div class="grid grid-cols-5 gap-4">
             <div class="text-center p-4 bg-green-50 rounded-lg">
@@ -87,7 +87,148 @@
         </div>
     </x-card>
 
-    <!-- Gizi Buruk Alert -->
+    {{-- Statistik Posyandu per Kelurahan --}}
+    <x-card title="📋 Statistik Posyandu per Kelurahan">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelurahan</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Posyandu</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Balita</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kader</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($posyanduStats as $stat)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ $stat['kelurahan']->name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $stat['posyandu_count'] }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $stat['balita_count'] }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $stat['kader_count'] }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </x-card>
+
+    {{-- Data Balita per Kelurahan --}}
+    <x-card title="👶 Data Balita per Kelurahan">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelurahan</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Balita</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stunting</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gizi Buruk</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stunting Rate</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($balitaPerKelurahan as $data)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ $data['kelurahan']->name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $data['total_balita'] }}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs {{ $data['stunting'] > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                                {{ $data['stunting'] }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs {{ $data['gizi_buruk'] > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                                {{ $data['gizi_buruk'] }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center">
+                                <div class="flex-1 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-{{ $data['stunting_rate'] > 20 ? 'red' : 'green' }}-500 h-2 rounded-full" style="width: {{ min($data['stunting_rate'], 100) }}%"></div>
+                                </div>
+                                <span class="text-xs text-gray-600">{{ number_format($data['stunting_rate'], 1) }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </x-card>
+
+    {{-- Monitoring Imunisasi per Kelurahan --}}
+    <x-card title="💉 Monitoring Imunisasi Bulan Ini ({{ now()->format('F Y') }})">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelurahan</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Imunisasi</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($imunisasiPerKelurahan as $imunisasi)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ is_array($imunisasi) ? $imunisasi['kelurahan_name'] : $imunisasi->kelurahan_name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ is_array($imunisasi) ? $imunisasi['total_imunisasi'] : $imunisasi->total_imunisasi }}</td>
+                        <td class="px-4 py-3">
+                            @php
+                                $totalImunisasi = is_array($imunisasi) ? $imunisasi['total_imunisasi'] : $imunisasi->total_imunisasi;
+                            @endphp
+                            @if($totalImunisasi > 0)
+                                <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Aktif</span>
+                            @else
+                                <span class="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">Belum Ada</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </x-card>
+
+    {{-- Jadwal Posyandu Seluruh Kelurahan --}}
+    <x-card title="📅 Jadwal Posyandu Mendatang">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posyandu</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelurahan</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hari</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Koordinator</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($jadwalPosyandu as $item)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ $item['posyandu']->name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ $item['posyandu']->kelurahan->name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            {{ $item['jadwal']['tanggal']->format('d M Y') }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ $item['jadwal']['hari'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            {{ $item['jadwal']['jam_mulai'] }} - {{ $item['jadwal']['jam_selesai'] }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            {{ $item['posyandu']->kaderKoordinator?->name ?? '-' }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @if($jadwalPosyandu->count() === 0)
+            <p class="text-center text-gray-500 py-4">Tidak ada jadwal posyandu yang terdaftar.</p>
+        @endif
+    </x-card>
+
+    {{-- Gizi Buruk Alert --}}
     @if($giziBurukBalitas->count() > 0)
     <x-card title="⚠️ Balita Gizi Buruk - Perlu Tindak Lanjut">
         <x-slot:headerAction>
@@ -131,7 +272,7 @@
     </x-card>
     @endif
 
-    <!-- Quick Actions -->
+    {{-- Quick Actions --}}
     <div class="flex flex-wrap gap-4">
         <x-button href="{{ route('admin-kecamatan.kelurahan.index') }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +282,8 @@
         </x-button>
         <x-button href="{{ route('admin-kecamatan.posyandu.index') }}" variant="secondary">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
             Kelola Posyandu
         </x-button>

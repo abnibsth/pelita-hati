@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
 
         // User Management (all roles below admin_kota)
         Route::resource('users', UserController::class);
+        Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
         // Data Balita (View All Jakarta)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
@@ -86,6 +87,7 @@ Route::middleware('auth')->group(function () {
 
         // User Management (kader, admin_kelurahan, nakes in their area)
         Route::resource('users', UserController::class);
+        Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
         // Data Balita (View all in their kecamatan)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
@@ -111,11 +113,15 @@ Route::middleware('auth')->group(function () {
         // View Data Wilayah (read-only for their kelurahan)
         Route::get('/kelurahan', [KelurahanController::class, 'index'])->name('kelurahan.index');
         Route::get('/kelurahan/{kelurahan}', [KelurahanController::class, 'show'])->name('kelurahan.show');
+        
+        // Posyandu Management (CRUD for their kelurahan)
         Route::get('/posyandu', [PosyanduController::class, 'index'])->name('posyandu.index');
+        Route::resource('posyandu', PosyanduController::class)->except(['index', 'show']);
         Route::get('/posyandu/{posyandu}', [PosyanduController::class, 'show'])->name('posyandu.show');
 
         // User Management (kader in their kelurahan)
         Route::resource('users', UserController::class);
+        Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
         // Data Balita (View all in their kelurahan)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
@@ -154,7 +160,10 @@ Route::middleware('auth')->group(function () {
         // Data Balita (View in their puskesmas area for health monitoring)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
+        
+        // Pertumbuhan (View only for nakes)
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
+        Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
 
         // Reports
         Route::get('/reports/gizi-buruk', [DashboardController::class, 'nakes'])->name('reports.gizi-buruk');

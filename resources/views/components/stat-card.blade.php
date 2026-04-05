@@ -9,6 +9,7 @@ $colorClasses = [
     'danger' => 'bg-red-500',
     'warning' => 'bg-yellow-500',
     'info' => 'bg-blue-500',
+    'purple' => 'bg-purple-500',
 ];
 @endphp
 

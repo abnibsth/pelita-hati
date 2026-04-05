@@ -113,8 +113,24 @@ $usersPrefix = "$routePrefix.users";
                         <div>{{ $user->phone ?? '-' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="{{ route($usersPrefix . '.show', $user) }}" class="text-primary-600 hover:text-primary-900 mr-3">Lihat</a>
-                        <a href="{{ route($usersPrefix . '.edit', $user) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
+                        <div class="flex items-center justify-end space-x-2">
+                            @if($user->role === 'kader')
+                            <form action="{{ route($routePrefix . '.users.toggle-status', $user) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="px-2 py-1 text-xs rounded-full {{ $user->is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200' }}"
+                                    onclick="return confirm('Ubah status user menjadi {{ $user->is_active ? 'nonaktif' : 'aktif' }}?')">
+                                    {{ $user->is_active ? '✓ Aktif' : '✗ Nonaktif' }}
+                                </button>
+                            </form>
+                            @else
+                            <span class="px-2 py-1 text-xs rounded-full {{ $user->is_active ?? true ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                {{ $user->is_active ?? true ? 'Aktif' : 'Nonaktif' }}
+                            </span>
+                            @endif
+                            <a href="{{ route($usersPrefix . '.show', $user) }}" class="text-primary-600 hover:text-primary-900">Lihat</a>
+                            <a href="{{ route($usersPrefix . '.edit', $user) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
+                        </div>
                     </td>
                 </tr>
                 @empty

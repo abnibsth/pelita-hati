@@ -9,6 +9,7 @@ $routePrefix = match($userRole) {
     'admin_kota' => 'admin-kota',
     'admin_kecamatan' => 'admin-kecamatan',
     'admin_kelurahan' => 'admin-kelurahan',
+    'nakes_puskesmas' => 'nakes',
     'kader' => 'kader',
     default => '',
 };
@@ -155,9 +156,11 @@ $pertumbuhanPrefix = "$routePrefix.pertumbuhan";
         </div>
         @else
         <x-empty-state message="Belum ada data pertumbuhan">
+            @if($userRole !== 'nakes_puskesmas')
             <x-slot:action>
                 <x-button href="{{ route($pertumbuhanPrefix . '.store', ['balita' => $balita]) }}">Tambah Data Penimbangan</x-button>
             </x-slot:action>
+            @endif
         </x-empty-state>
         @endif
     </x-card>

@@ -74,7 +74,17 @@ class PosyanduController extends Controller
 
         Posyandu::create($validated);
 
-        return redirect()->route('posyandu.index')
+        // Redirect based on user role
+        $user = auth()->user();
+        if ($user->role === 'admin_kecamatan') {
+            return redirect()->route('admin-kecamatan.posyandu.index')
+                ->with('success', 'Posyandu berhasil ditambahkan.');
+        } elseif ($user->role === 'admin_kelurahan') {
+            return redirect()->route('admin-kelurahan.posyandu.index')
+                ->with('success', 'Posyandu berhasil ditambahkan.');
+        }
+
+        return redirect()->route('admin-kota.posyandu.index')
             ->with('success', 'Posyandu berhasil ditambahkan.');
     }
 
@@ -184,7 +194,7 @@ class PosyanduController extends Controller
                 ->with('success', 'Data posyandu berhasil diperbarui.');
         }
 
-        return redirect()->route('posyandu.show', $posyandu)
+        return redirect()->route('admin-kota.posyandu.show', $posyandu)
             ->with('success', 'Data posyandu berhasil diperbarui.');
     }
 
@@ -197,7 +207,7 @@ class PosyanduController extends Controller
 
         $posyandu->delete();
 
-        return redirect()->route('posyandu.index')
+        return redirect()->route('admin-kota.posyandu.index')
             ->with('success', 'Posyandu berhasil dihapus.');
     }
 

@@ -9,6 +9,7 @@ $routePrefix = match($userRole) {
     'admin_kota' => 'admin-kota',
     'admin_kecamatan' => 'admin-kecamatan',
     'admin_kelurahan' => 'admin-kelurahan',
+    'nakes_puskesmas' => 'nakes',
     'kader' => 'kader',
     default => '',
 };

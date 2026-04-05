@@ -9,6 +9,7 @@ $routePrefix = match($userRole) {
     'admin_kota' => 'admin-kota',
     'admin_kecamatan' => 'admin-kecamatan',
     'admin_kelurahan' => 'admin-kelurahan',
+    'nakes_puskesmas' => 'nakes',
     'kader' => 'kader',
     default => '',
 };
@@ -42,7 +43,7 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-500">Tanggal Imunisasi</label>
-                <p class="mt-1 text-base text-gray-900">{{ $record->tanggal->format('d F Y') }}</p>
+                <p class="mt-1 text-base text-gray-900">{{ $record->tanggal_diberikan ? $record->tanggal_diberikan->format('d F Y') : '-' }}</p>
             </div>
 
             <div>
@@ -67,8 +68,8 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
 
             <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-500">Dicatat Oleh</label>
-                <p class="mt-1 text-base text-gray-900">{{ $record->user->name }}</p>
-                <p class="text-sm text-gray-500">{{ $record->user->role }}</p>
+                <p class="mt-1 text-base text-gray-900">{{ $record->inputBy?->name ?? '-' }}</p>
+                <p class="text-sm text-gray-500">{{ $record->inputBy?->role ?? '-' }}</p>
             </div>
 
             <div class="md:col-span-2">

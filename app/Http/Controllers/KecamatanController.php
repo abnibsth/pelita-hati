@@ -58,7 +58,7 @@ class KecamatanController extends Controller
 
         Kecamatan::create($validated);
 
-        return redirect()->route('kecamatan.index')
+        return redirect()->route('admin-kota.kecamatan.index')
             ->with('success', 'Kecamatan berhasil ditambahkan.');
     }
 
@@ -113,7 +113,7 @@ class KecamatanController extends Controller
 
         $kecamatan->update($validated);
 
-        return redirect()->route('kecamatan.show', $kecamatan)
+        return redirect()->route('admin-kota.kecamatan.show', $kecamatan)
             ->with('success', 'Data kecamatan berhasil diperbarui.');
     }
 
@@ -126,7 +126,7 @@ class KecamatanController extends Controller
 
         $kecamatan->delete();
 
-        return redirect()->route('kecamatan.index')
+        return redirect()->route('admin-kota.kecamatan.index')
             ->with('success', 'Kecamatan berhasil dihapus.');
     }
 }

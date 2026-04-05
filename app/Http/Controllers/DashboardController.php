@@ -9,6 +9,7 @@ use App\Models\Kelurahan;
 use App\Models\PertumbuhanRecord;
 use App\Models\Posyandu;
 use App\Models\Rujukan;
+use App\Models\User;
 use App\Services\ReportGenerator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,8 @@ class DashboardController extends Controller
         $totalKelurahan = Kelurahan::count();
         $totalPosyandu = Posyandu::count();
         $totalBalita = Balita::where('status', 'aktif')->count();
+        $totalKader = User::where('role', 'kader')->count();
+        $totalNakes = User::where('role', 'nakes_puskesmas')->count();
 
         // Status gizi seluruh Jakarta
         $latestRecords = PertumbuhanRecord::select('status_gizi')
@@ -52,6 +55,69 @@ class DashboardController extends Controller
             'lebih' => $latestRecords->where('status_gizi', 'lebih')->count(),
         ];
 
+        // Stunting rate per kecamatan
+        $stuntingByKecamatan = Kecamatan::with(['kelurahans.posyandus.balitas.pertumbuhanRecords' => function ($q) {
+            $q->select('balita_id', 'status_gizi')
+                ->orderBy('tanggal', 'desc');
+        }])
+            ->get()
+            ->map(function ($kecamatan) {
+                $totalBalita = 0;
+                $stuntingCount = 0;
+
+                foreach ($kecamatan->kelurahans as $kelurahan) {
+                    foreach ($kelurahan->posyandus as $posyandu) {
+                        foreach ($posyandu->balitas as $balita) {
+                            if ($balita->status === 'aktif') {
+                                $totalBalita++;
+                                $latestRecord = $balita->pertumbuhanRecords->first();
+                                if ($latestRecord && $latestRecord->status_gizi === 'stunting') {
+                                    $stuntingCount++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return [
+                    'id' => $kecamatan->id,
+                    'name' => $kecamatan->name,
+                    'total_balita' => $totalBalita,
+                    'stunting_count' => $stuntingCount,
+                    'stunting_rate' => $totalBalita > 0 ? ($stuntingCount / $totalBalita) * 100 : 0,
+                ];
+            });
+
+        // Monthly posyandu visits (last 6 months)
+        $monthlyVisits = collect(range(5, 0))->map(function ($i) {
+            $date = now()->subMonths($i);
+            $month = $date->month;
+            $year = $date->year;
+            $monthName = $date->format('M Y');
+
+            $visitCount = Kehadiran::whereYear('tanggal', $year)
+                ->whereMonth('tanggal', $month)
+                ->where('hadir', true)
+                ->count();
+
+            $posyanduCount = Kehadiran::whereYear('tanggal', $year)
+                ->whereMonth('tanggal', $month)
+                ->distinct('posyandu_id')
+                ->count('posyandu_id');
+
+            return [
+                'month' => $monthName,
+                'visits' => $visitCount,
+                'posyandu_visited' => $posyanduCount,
+            ];
+        });
+
+        // Kecamatan with low coverage (alert)
+        $lowCoverageKecamatan = $stuntingByKecamatan
+            ->filter(fn ($k) => $k['stunting_rate'] > 20) // Threshold: 20%
+            ->sortByDesc('stunting_rate')
+            ->values();
+
         // Balita gizi buruk (untuk monitoring)
         $giziBurukBalitas = Balita::where('status', 'aktif')
             ->whereHas('pertumbuhanRecords', function ($q) {
@@ -69,7 +135,12 @@ class DashboardController extends Controller
             'totalKelurahan',
             'totalPosyandu',
             'totalBalita',
+            'totalKader',
+            'totalNakes',
             'statusGizi',
+            'stuntingByKecamatan',
+            'monthlyVisits',
+            'lowCoverageKecamatan',
             'giziBurukBalitas'
         ));
     }
@@ -114,6 +185,87 @@ class DashboardController extends Controller
             'lebih' => $latestRecords->where('status_gizi', 'lebih')->count(),
         ];
 
+        // Statistik Posyandu per Kelurahan
+        $posyanduStats = $kecamatan->kelurahans->load('posyandus')->map(function ($kelurahan) {
+            $posyanduCount = $kelurahan->posyandus->count();
+            $balitaCount = $kelurahan->posyandus->sum(function ($posyandu) {
+                return $posyandu->balitas()->where('status', 'aktif')->count();
+            });
+            $kaderCount = User::where('role', 'kader')
+                ->whereIn('posyandu_id', $kelurahan->posyandus->pluck('id'))
+                ->count();
+
+            return [
+                'kelurahan' => $kelurahan,
+                'posyandu_count' => $posyanduCount,
+                'balita_count' => $balitaCount,
+                'kader_count' => $kaderCount,
+            ];
+        });
+
+        // Data Balita per Kelurahan
+        $balitaPerKelurahan = $kecamatan->kelurahans->load('posyandus.balitas')->map(function ($kelurahan) {
+            $balitas = $kelurahan->posyandus->flatMap->balitas->where('status', 'aktif');
+            $stuntingCount = $balitas->filter(function ($balita) {
+                $latest = $balita->pertumbuhanRecords->first();
+
+                return $latest && $latest->status_gizi === 'stunting';
+            })->count();
+            $giziBurukCount = $balitas->filter(function ($balita) {
+                $latest = $balita->pertumbuhanRecords->first();
+
+                return $latest && $latest->status_gizi === 'gizi_buruk';
+            })->count();
+
+            return [
+                'kelurahan' => $kelurahan,
+                'total_balita' => $balitas->count(),
+                'stunting' => $stuntingCount,
+                'gizi_buruk' => $giziBurukCount,
+                'stunting_rate' => $balitas->count() > 0 ? ($stuntingCount / $balitas->count()) * 100 : 0,
+            ];
+        });
+
+        // Monitoring Imunisasi per Kelurahan
+        $imunisasiPerKelurahan = DB::table('imunisasi_records')
+            ->select('kelurahans.name as kelurahan_name', 'kelurahans.id as kelurahan_id')
+            ->join('balitas', 'imunisasi_records.balita_id', '=', 'balitas.id')
+            ->join('posyandus', 'balitas.posyandu_id', '=', 'posyandus.id')
+            ->join('kelurahans', 'posyandus.kelurahan_id', '=', 'kelurahans.id')
+            ->whereIn('kelurahans.id', $kecamatan->kelurahans->pluck('id'))
+            ->whereYear('imunisasi_records.tanggal_diberikan', now()->year)
+            ->whereMonth('imunisasi_records.tanggal_diberikan', now()->month)
+            ->groupBy('kelurahans.id', 'kelurahans.name')
+            ->selectRaw('kelurahans.id as kelurahan_id, kelurahans.name as kelurahan_name, COUNT(*) as total_imunisasi')
+            ->get()
+            ->keyBy('kelurahan_id');
+
+        // Add kelurahans with zero immunizations
+        foreach ($kecamatan->kelurahans as $kelurahan) {
+            if (! $imunisasiPerKelurahan->has($kelurahan->id)) {
+                $imunisasiPerKelurahan->put($kelurahan->id, [
+                    'kelurahan_name' => $kelurahan->name,
+                    'kelurahan_id' => $kelurahan->id,
+                    'total_imunisasi' => 0,
+                ]);
+            }
+        }
+
+        // Jadwal Posyandu Seluruh Kelurahan (upcoming)
+        $jadwalPosyandu = Posyandu::whereIn('kelurahan_id', $kecamatan->kelurahans->pluck('id'))
+            ->with(['kelurahan', 'kaderKoordinator'])
+            ->get()
+            ->map(function ($posyandu) {
+                $jadwal = $this->getNextJadwalForPosyandu($posyandu);
+
+                return [
+                    'posyandu' => $posyandu,
+                    'jadwal' => $jadwal,
+                ];
+            })
+            ->sortBy('jadwal.tanggal')
+            ->take(10);
+
         // Gizi buruk di kecamatan
         $giziBurukBalitas = Balita::whereHas('posyandu', function ($q) use ($posyanduIds) {
             $q->whereIn('posyandu_id', $posyanduIds);
@@ -135,6 +287,10 @@ class DashboardController extends Controller
             'totalPosyandu',
             'totalBalita',
             'statusGizi',
+            'posyanduStats',
+            'balitaPerKelurahan',
+            'imunisasiPerKelurahan',
+            'jadwalPosyandu',
             'giziBurukBalitas'
         ));
     }
@@ -178,13 +334,84 @@ class DashboardController extends Controller
             now()->year
         );
 
+        // Data seluruh posyandu di kelurahan dengan detail
+        $posyanduDetails = $kelurahan->posyandus()
+            ->with(['kaderKoordinator', 'kelurahan.kecamatan'])
+            ->get()
+            ->map(function ($posyandu) {
+                $balitaCount = $posyandu->balitas()->where('status', 'aktif')->count();
+                $kaderCount = User::where('role', 'kader')
+                    ->where('posyandu_id', $posyandu->id)
+                    ->count();
+
+                return [
+                    'posyandu' => $posyandu,
+                    'balita_count' => $balitaCount,
+                    'kader_count' => $kaderCount,
+                ];
+            });
+
+        // Manajemen kader posyandu
+        $kaders = User::where('role', 'kader')
+            ->where('kelurahan_id', $kelurahan->id)
+            ->with(['posyandu'])
+            ->orderBy('name')
+            ->get();
+
+        // Jadwal kegiatan posyandu (bulan ini)
+        $jadwalKegiatan = $kelurahan->posyandus()
+            ->with(['kaderKoordinator', 'kelurahan'])
+            ->get()
+            ->map(function ($posyandu) {
+                $jadwal = $this->getNextJadwal($posyandu);
+
+                return [
+                    'posyandu' => $posyandu,
+                    'jadwal' => $jadwal,
+                ];
+            })
+            ->sortBy('jadwal.tanggal');
+
+        // Stok obat & vitamin posyandu (aggregate dari semua posyandu)
+        // Note: Ini menggunakan data imunisasi records sebagai proxy untuk tracking
+        $imunisasiTypes = DB::table('imunisasi_records')
+            ->select('jenis_imunisasi', DB::raw('COUNT(*) as total'))
+            ->join('balitas', 'imunisasi_records.balita_id', '=', 'balitas.id')
+            ->join('posyandus', 'balitas.posyandu_id', '=', 'posyandus.id')
+            ->where('posyandus.kelurahan_id', $kelurahan->id)
+            ->whereYear('imunisasi_records.tanggal_diberikan', now()->year)
+            ->whereMonth('imunisasi_records.tanggal_diberikan', now()->month)
+            ->groupBy('jenis_imunisasi')
+            ->get();
+
+        // Reminder jadwal posyandu (yang akan datang dalam 7 hari)
+        $reminderJadwal = $kelurahan->posyandus()
+            ->with(['kaderKoordinator', 'kelurahan'])
+            ->get()
+            ->map(function ($posyandu) {
+                $jadwal = $this->getNextJadwal($posyandu);
+
+                return [
+                    'posyandu' => $posyandu,
+                    'jadwal' => $jadwal,
+                    'days_until' => now()->diffInDays($jadwal['tanggal'], false),
+                ];
+            })
+            ->filter(fn ($item) => $item['days_until'] >= 0 && $item['days_until'] <= 7)
+            ->sortBy('jadwal.tanggal');
+
         return view('dashboards.admin-kelurahan', compact(
             'kelurahan',
             'totalPosyandu',
             'totalBalita',
             'statusGizi',
             'giziBurukBalitas',
-            'skdn'
+            'skdn',
+            'posyanduDetails',
+            'kaders',
+            'jadwalKegiatan',
+            'imunisasiTypes',
+            'reminderJadwal'
         ));
     }
 
@@ -380,6 +607,14 @@ class DashboardController extends Controller
             'jam_mulai' => $posyandu->jadwal_jam_mulai,
             'jam_selesai' => $posyandu->jadwal_jam_selesai,
         ];
+    }
+
+    /**
+     * Alias untuk getNextJadwal - digunakan di adminKecamatan
+     */
+    private function getNextJadwalForPosyandu(Posyandu $posyandu): array
+    {
+        return $this->getNextJadwal($posyandu);
     }
 
     /**

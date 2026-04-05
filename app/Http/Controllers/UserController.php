@@ -175,6 +175,21 @@ class UserController extends Controller
     }
 
     /**
+     * Toggle active/inactive status for user
+     */
+    public function toggleStatus(User $user)
+    {
+        Gate::authorize('update', $user);
+
+        $user->update(['is_active' => ! $user->is_active]);
+
+        $status = $user->is_active ? 'aktif' : 'nonaktif';
+
+        return redirect()->back()
+            ->with('success', "Status user berhasil diubah menjadi {$status}.");
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(User $user)

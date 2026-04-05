@@ -10,6 +10,7 @@ $routePrefix = match($userRole) {
     'admin_kecamatan' => 'admin-kecamatan',
     'admin_kelurahan' => 'admin-kelurahan',
     'kader' => 'kader',
+    'nakes_puskesmas' => 'nakes',
     default => '',
 };
 $balitaPrefix = "$routePrefix.balita";
@@ -37,14 +38,14 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
 
         <form action="{{ route($imunisasiPrefix . '.store', ['balita' => $balita]) }}" method="POST" class="space-y-6">
             @csrf
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700">Tanggal Imunisasi <span class="text-red-500">*</span></label>
-                    <input type="date" name="tanggal" id="tanggal" required max="{{ date('Y-m-d') }}"
-                        class="mt-1 block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('tanggal') border-red-500 @enderror"
-                        value="{{ old('tanggal', date('Y-m-d')) }}">
-                    @error('tanggal')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    <label for="tanggal_diberikan" class="block text-sm font-medium text-gray-700">Tanggal Imunisasi <span class="text-red-500">*</span></label>
+                    <input type="date" name="tanggal_diberikan" id="tanggal_diberikan" required max="{{ date('Y-m-d') }}"
+                        class="mt-1 block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('tanggal_diberikan') border-red-500 @enderror"
+                        value="{{ old('tanggal_diberikan', date('Y-m-d')) }}">
+                    @error('tanggal_diberikan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>

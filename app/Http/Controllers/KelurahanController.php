@@ -69,7 +69,7 @@ class KelurahanController extends Controller
 
         Kelurahan::create($validated);
 
-        return redirect()->route('kelurahan.index')
+        return redirect()->route('admin-kota.kelurahan.index')
             ->with('success', 'Kelurahan berhasil ditambahkan.');
     }
 
@@ -121,7 +121,7 @@ class KelurahanController extends Controller
 
         $kelurahan->update($validated);
 
-        return redirect()->route('kelurahan.show', $kelurahan)
+        return redirect()->route('admin-kota.kelurahan.show', $kelurahan)
             ->with('success', 'Data kelurahan berhasil diperbarui.');
     }
 
@@ -134,7 +134,7 @@ class KelurahanController extends Controller
 
         $kelurahan->delete();
 
-        return redirect()->route('kelurahan.index')
+        return redirect()->route('admin-kota.kelurahan.index')
             ->with('success', 'Kelurahan berhasil dihapus.');
     }
 

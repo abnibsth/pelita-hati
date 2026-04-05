@@ -9,6 +9,7 @@ $routePrefix = match($userRole) {
     'admin_kota' => 'admin-kota',
     'admin_kecamatan' => 'admin-kecamatan',
     'admin_kelurahan' => 'admin-kelurahan',
+    'nakes_puskesmas' => 'nakes',
     'kader' => 'kader',
     default => '',
 };
@@ -68,7 +69,7 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($imunisasiRecords as $record)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->tanggal->format('d M Y') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->tanggal_diberikan ? $record->tanggal_diberikan->format('d M Y') : '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {{ str_replace('_', ' ', $record->jenis_imunisasi) }}
