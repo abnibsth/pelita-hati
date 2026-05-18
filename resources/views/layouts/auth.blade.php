@@ -15,234 +15,202 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; }
 
+        :root {
+            --bg-dark: #09090b;
+            --bg-light: #FAFAFA;
+            --text-dark: #FAFAFA;
+            --text-light: #09090b;
+            --emerald-accent: #059669;
+            --emerald-accent-hover: #047857;
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: #09090b;
-            color: #18181b;
+            background-color: var(--bg-light);
+            color: var(--text-light);
             min-height: 100dvh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Perpetual micro-interactions (MOTION_INTENSITY 6) */
-        @keyframes drift {
-            0%, 100% { transform: translateY(0) translateX(0); }
-            33%       { transform: translateY(-14px) translateX(6px); }
-            66%       { transform: translateY(-6px) translateX(-8px); }
+        /* Ambient subtle grain */
+        .noise-bg {
+            position: relative;
         }
-        @keyframes drift-b {
-            0%, 100% { transform: translateY(0) translateX(0); }
-            33%       { transform: translateY(10px) translateX(-6px); }
-            66%       { transform: translateY(6px) translateX(10px); }
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.6; transform: scale(0.85); }
-        }
-        @keyframes shimmer-line {
-            0%   { transform: translateX(-100%) skewX(-12deg); }
-            100% { transform: translateX(250%) skewX(-12deg); }
-        }
-        @keyframes fade-up {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .drift-a  { animation: drift   14s ease-in-out infinite; }
-        .drift-b  { animation: drift-b 18s ease-in-out infinite 3s; }
-        .pulse-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
-
-        /* Staggered load-in cascade */
-        .fade-in { opacity: 0; animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .delay-1 { animation-delay: 0.05s; }
-        .delay-2 { animation-delay: 0.12s; }
-        .delay-3 { animation-delay: 0.20s; }
-        .delay-4 { animation-delay: 0.28s; }
-        .delay-5 { animation-delay: 0.36s; }
-        .delay-6 { animation-delay: 0.44s; }
-
-        /* Liquid Glass — proper refraction (TASTE_SKILL §4) */
-        .liquid-glass {
-            background: rgba(255, 255, 255, 0.58);
-            backdrop-filter: blur(24px) saturate(1.4);
-            -webkit-backdrop-filter: blur(24px) saturate(1.4);
-            border: 1px solid rgba(255, 255, 255, 0.75);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                0 24px 48px -12px rgba(0, 0, 0, 0.08);
-        }
-
-        /* Form input — glass surface */
-        .form-input {
-            width: 100%;
-            background: rgba(255,255,255,0.6);
-            border: 1px solid rgba(209, 213, 219, 0.8);
-            border-radius: 0.875rem;
-            padding: 0.8125rem 1rem;
-            font-size: 0.9375rem;
-            font-family: 'Outfit', sans-serif;
-            color: #18181b;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-            outline: none;
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
-        }
-        .form-input:focus {
-            border-color: #10b981;
-            background: rgba(255,255,255,0.9);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12),
-                        inset 0 1px 0 rgba(255,255,255,0.9);
-        }
-        .form-input.is-error {
-            border-color: #f87171;
-            background: rgba(255,245,245,0.8);
-        }
-        .form-input::placeholder { color: #a1a1aa; }
-
-        /* Shimmer effect on stat card */
-        .shimmer::after {
-            content: '';
+        .noise-bg::before {
+            content: "";
             position: absolute;
             inset: 0;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
-            transform: translateX(-100%) skewX(-12deg);
-            animation: shimmer-line 3.5s ease-in-out infinite 1.5s;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        /* Submit button — tactile feedback */
+        /* Staggered load-in cascade */
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { opacity: 0; animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-1 { animation-delay: 0.05s; }
+        .delay-2 { animation-delay: 0.12s; }
+        .delay-3 { animation-delay: 0.18s; }
+        .delay-4 { animation-delay: 0.24s; }
+        .delay-5 { animation-delay: 0.30s; }
+        .delay-6 { animation-delay: 0.36s; }
+
+        /* Form input — Pristine Solid */
+        .form-input {
+            width: 100%;
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9375rem;
+            font-family: 'Outfit', sans-serif;
+            color: #18181B;
+            transition: all 0.2s ease;
+            outline: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+        .form-input:hover {
+            border-color: #D1D5DB;
+        }
+        .form-input:focus {
+            border-color: var(--emerald-accent);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+        .form-input.is-error {
+            border-color: #EF4444;
+            background: #FEF2F2;
+        }
+        .form-input::placeholder { color: #A1A1AA; font-weight: 400; }
+
+        /* Submit button — tactile solid */
         .btn-submit {
             width: 100%;
             padding: 0.875rem 1.5rem;
-            border-radius: 0.875rem;
-            background: #09090b;
-            color: #fff;
+            border-radius: 0.5rem;
+            background: #09090B;
+            color: #FFFFFF;
             font-family: 'Outfit', sans-serif;
             font-size: 0.9375rem;
             font-weight: 500;
-            letter-spacing: -0.01em;
             border: none;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-            box-shadow: 0 4px 14px -2px rgba(9,9,11,0.25);
+            transition: background 0.15s, transform 0.1s;
             position: relative;
-            overflow: hidden;
         }
-        .btn-submit:hover  { background: #27272a; }
-        .btn-submit:active { transform: scale(0.98) translateY(1px); box-shadow: 0 2px 6px -1px rgba(9,9,11,0.2); }
+        .btn-submit:hover  { background: #27272A; }
+        .btn-submit:active { transform: scale(0.99); background: #18181B; }
+
+        .btn-submit-emerald {
+            background: var(--emerald-accent);
+            color: #FFFFFF;
+        }
+        .btn-submit-emerald:hover { background: var(--emerald-accent-hover); }
 
         /* Mono numbers */
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+        
+        .tracking-tighter-plus { letter-spacing: -0.04em; }
+        
+        /* High-end container shadow */
+        .pristine-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
+        }
     </style>
 </head>
 <body class="antialiased">
 
 <div class="min-h-[100dvh] grid grid-cols-1 lg:grid-cols-2">
 
-    <!-- ===== LEFT PANEL: Dark Branding ===== -->
-    <div class="relative hidden lg:flex flex-col justify-between overflow-hidden bg-zinc-950 px-14 py-12">
+    <!-- ===== LEFT PANEL: Deep Dark Editorial ===== -->
+    <div class="relative hidden lg:flex flex-col justify-between overflow-hidden bg-zinc-950 px-14 py-12 noise-bg">
 
-        <!-- Ambient blobs — perpetual drift -->
-        <div class="drift-a pointer-events-none absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full"
-             style="background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%);"></div>
-        <div class="drift-b pointer-events-none absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full"
-             style="background: radial-gradient(circle, rgba(16,185,129,0.10) 0%, transparent 70%);"></div>
+        <!-- Subtle geometric structural lines (Wireframe aesthetic) -->
+        <div class="pointer-events-none absolute inset-0 z-0 opacity-20">
+            <div class="absolute left-14 top-0 bottom-0 w-[1px] bg-zinc-800"></div>
+            <div class="absolute right-14 top-0 bottom-0 w-[1px] bg-zinc-800"></div>
+            <div class="absolute top-24 left-0 right-0 h-[1px] bg-zinc-800"></div>
+            <div class="absolute bottom-24 left-0 right-0 h-[1px] bg-zinc-800"></div>
+        </div>
 
-        <!-- Subtle grid texture -->
-        <div class="pointer-events-none absolute inset-0"
-             style="background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 48px 48px;"></div>
+        <!-- Spotlight gradient -->
+        <div class="pointer-events-none absolute top-0 right-0 w-[600px] h-[600px] rounded-full z-0"
+             style="background: radial-gradient(circle at top right, rgba(5,150,105,0.12) 0%, transparent 60%);"></div>
 
         <!-- Logo -->
-        <a href="{{ route('home') }}" class="relative z-10 flex items-center space-x-3 w-fit">
-            <div class="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"
-                 style="box-shadow: 0 4px 14px -2px rgba(16,185,129,0.4);">
-                <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{{ route('home') }}" class="relative z-20 flex items-center space-x-3 w-fit pt-2">
+            <div class="w-8 h-8 rounded bg-emerald-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
             </div>
-            <span class="text-white font-semibold text-lg tracking-tight">SiPosyandu</span>
+            <span class="text-white font-medium text-lg tracking-tight">SiPosyandu</span>
         </a>
 
-        <!-- Hero copy -->
-        <div class="relative z-10 space-y-6 max-w-md">
-            <div class="flex items-center space-x-2">
-                <span class="pulse-dot inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span class="text-emerald-400 text-xs font-medium uppercase tracking-[0.12em]">Sistem aktif · DKI Jakarta</span>
+        <!-- Copy & Data -->
+        <div class="relative z-20 w-full max-w-md">
+            <div class="mb-4 inline-flex items-center space-x-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                <span class="text-zinc-400 text-xs font-medium uppercase tracking-[0.1em]">Infrastruktur Data Jakarta</span>
             </div>
 
-            <h1 class="text-4xl xl:text-[2.75rem] font-semibold text-white tracking-tighter leading-[1.08]">
-                Satu platform<br/>untuk semua data<br/><span class="text-emerald-400">posyandu Jakarta.</span>
+            <h1 class="text-5xl font-semibold text-white tracking-tighter-plus leading-[1.1] mb-6" style="text-wrap: balance;">
+                Pantau tumbuh kembang dengan <span class="text-zinc-500">presisi.</span>
             </h1>
 
-            <p class="text-zinc-400 text-[0.9375rem] leading-relaxed max-w-[38ch]">
-                Pencatatan pertumbuhan, imunisasi, vitamin, dan rujukan — terintegrasi real-time dari posyandu ke puskesmas.
-            </p>
+            <!-- Editorial Quote Line -->
+            <div class="border-l border-zinc-800 pl-5 mb-10">
+                <p class="text-zinc-400 text-[0.9375rem] leading-relaxed">
+                    Sistem informasi manajemen terpadu yang menghubungkan Orangtua, Kader Posyandu, dan Tenaga Kesehatan Puskesmas secara real-time.
+                </p>
+            </div>
 
-            <!-- Stat cards — liquid glass on dark -->
-            <div class="space-y-3 pt-4">
-                <!-- Card 1 -->
-                <div class="shimmer relative overflow-hidden flex items-center justify-between rounded-2xl px-5 py-4"
-                     style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);">
-                    <div>
-                        <p class="text-zinc-500 text-[11px] font-medium uppercase tracking-widest mb-1">Balita Terpantau</p>
-                        <p class="mono text-white text-2xl font-semibold tracking-tight">120.847</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center"
-                         style="background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.2);">
-                        <svg class="text-emerald-400" style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
+            <!-- Stats (Solid minimal blocks instead of glassy) -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-[#121212] border border-zinc-900 rounded-xl p-5">
+                    <p class="text-zinc-500 text-[10px] font-medium uppercase tracking-widest mb-1.5">Balita Terpantau</p>
+                    <p class="mono text-white text-2xl font-semibold tracking-tight">120k<span class="text-emerald-500">+</span></p>
                 </div>
-
-                <!-- Card 2 -->
-                <div class="flex items-center justify-between rounded-2xl px-5 py-4 ml-8"
-                     style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);">
-                    <div>
-                        <p class="text-zinc-500 text-[11px] font-medium uppercase tracking-widest mb-1">Posyandu Aktif</p>
-                        <p class="mono text-white text-2xl font-semibold tracking-tight">342</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center"
-                         style="background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2);">
-                        <svg class="text-blue-400" style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                    </div>
+                <div class="bg-[#121212] border border-zinc-900 rounded-xl p-5">
+                    <p class="text-zinc-500 text-[10px] font-medium uppercase tracking-widest mb-1.5">Akurasi Z-Score</p>
+                    <p class="mono text-white text-2xl font-semibold tracking-tight">99.9<span class="text-emerald-500">%</span></p>
                 </div>
             </div>
         </div>
 
         <!-- Bottom footer -->
-        <p class="relative z-10 text-zinc-600 text-xs">
-            © {{ date('Y') }} Dinas Kesehatan DKI Jakarta
-        </p>
+        <div class="relative z-20 flex items-center justify-between pb-2">
+            <p class="text-zinc-500 text-xs">© {{ date('Y') }} Dinas Kesehatan DKI Jakarta</p>
+            <p class="text-zinc-600 text-[10px] uppercase tracking-widest mono">SYS.V2.0</p>
+        </div>
     </div>
 
-    <!-- ===== RIGHT PANEL: Form Area ===== -->
-    <div class="relative flex flex-col items-center justify-center min-h-[100dvh] px-6 sm:px-10"
-         style="background: linear-gradient(135deg, #f0fdf4 0%, #f9fafb 40%, #eff6ff 100%);">
+    <!-- ===== RIGHT PANEL: Pristine Light Form Area ===== -->
+    <div class="relative flex flex-col items-center justify-center min-h-[100dvh] px-4 sm:px-10 bg-[#FAFAFA]">
 
-        <!-- Soft radial behind the card -->
-        <div class="pointer-events-none absolute inset-0"
-             style="background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(16,185,129,0.07) 0%, transparent 70%);"></div>
-
-        <!-- Mobile logo -->
-        <div class="lg:hidden flex items-center space-x-3 absolute top-6 left-6">
-            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                <svg style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-white">
+        <!-- Mobile Header (Visible only on small screens) -->
+        <div class="lg:hidden absolute top-6 left-6 flex items-center space-x-2">
+            <div class="w-7 h-7 rounded bg-emerald-600 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
             </div>
-            <span class="font-semibold text-zinc-900 text-base tracking-tight">SiPosyandu</span>
+            <span class="font-medium text-zinc-900 text-sm tracking-tight">SiPosyandu</span>
         </div>
 
-        <!-- Form card — liquid glass -->
-        <div class="relative z-10 w-full max-w-[420px]">
-
-            <div class="liquid-glass rounded-[2rem] p-8 sm:p-10">
-
+        <!-- The Pristine Form Card -->
+        <div class="relative z-10 w-full max-w-[400px]">
+            <div class="pristine-card p-8 sm:p-10">
                 <!-- Header slot -->
                 <div class="fade-in delay-1 mb-8">
                     @yield('form-header')
@@ -252,17 +220,17 @@
                 <div class="fade-in delay-2">
                     @yield('content')
                 </div>
+            </div>
 
-                <!-- Back link -->
-                <div class="fade-in delay-6 mt-6 text-center">
-                    <a href="{{ route('home') }}"
-                       class="inline-flex items-center space-x-1.5 text-sm text-zinc-400 hover:text-zinc-600 transition-colors duration-200">
-                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                        </svg>
-                        <span>Halaman utama</span>
-                    </a>
-                </div>
+            <!-- Back link -->
+            <div class="fade-in delay-6 mt-8 text-center">
+                <a href="{{ route('home') }}"
+                   class="inline-flex items-center space-x-2 text-[13px] font-medium text-zinc-400 hover:text-zinc-900 transition-colors duration-200">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span>Kembali ke Halaman Utama</span>
+                </a>
             </div>
         </div>
     </div>
