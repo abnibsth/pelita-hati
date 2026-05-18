@@ -34,10 +34,12 @@
             </form>
         </div>
         @can('create', App\Models\Balita::class)
+        @if(Route::has($balitaPrefix . '.create'))
         <x-button href="{{ route($balitaPrefix . '.create') }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Tambah Balita
         </x-button>
+        @endif
         @endcan
     </div>
 
@@ -81,14 +83,18 @@
                         <td class="px-4 py-3 text-sm space-x-2">
                             <a href="{{ route($balitaPrefix . '.show', $balita) }}" class="text-primary-600 hover:text-primary-900">Lihat</a>
                             @can('update', $balita)
+                            @if(Route::has($balitaPrefix . '.edit'))
                             <a href="{{ route($balitaPrefix . '.edit', $balita) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                            @endif
                             @endcan
                             @can('delete', $balita)
+                            @if(Route::has($balitaPrefix . '.destroy'))
                             <form action="{{ route($balitaPrefix . '.destroy', $balita) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
                             </form>
+                            @endif
                             @endcan
                         </td>
                     </tr>
@@ -105,7 +111,9 @@
         <x-empty-state message="Belum ada data balita">
             <x-slot:action>
                 @can('create', App\Models\Balita::class)
+                @if(Route::has($balitaPrefix . '.create'))
                 <x-button href="{{ route($balitaPrefix . '.create') }}">Tambah Balita Baru</x-button>
+                @endif
                 @endcan
             </x-slot:action>
         </x-empty-state>

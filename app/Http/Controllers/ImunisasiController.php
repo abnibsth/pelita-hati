@@ -75,11 +75,47 @@ class ImunisasiController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Balita $balita)
+    public function create(Request $request, Balita $balita = null)
     {
-        Gate::authorize('update', $balita);
+        $user = Auth::user();
 
-        return view('imunisasi.create', compact('balita'));
+        // If balita is provided, check authorization and show form
+        if ($balita && $balita->exists) {
+            Gate::authorize('update', $balita);
+            return view('imunisasi.create', compact('balita'));
+        }
+
+        // If no balita provided, show list of balitas to choose from (for nakes)
+        if ($user->role === 'nakes_puskesmas') {
+            $puskesmas = $user->puskesmas;
+
+            // Get all balitas in puskesmas area
+            $balitas = Balita::whereHas('posyandu.kelurahan', function ($q) use ($puskesmas) {
+                    $q->where('kecamatan_id', $puskesmas->kecamatan_id);
+                })
+                ->with(['posyandu.kelurahan'])
+                ->orderBy('name', 'asc')
+                ->paginate(20);
+
+            // Search
+            if ($request->has('search')) {
+                $search = $request->search;
+                $balitas = Balita::where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('nik', 'like', "%{$search}%");
+                    })
+                    ->whereHas('posyandu.kelurahan', function ($q) use ($puskesmas) {
+                        $q->where('kecamatan_id', $puskesmas->kecamatan_id);
+                    })
+                    ->with(['posyandu.kelurahan'])
+                    ->orderBy('name', 'asc')
+                    ->paginate(20);
+            }
+
+            return view('nakes.imunisasi.create', compact('balitas', 'puskesmas'));
+        }
+
+        abort(403, 'Unauthorized access');
     }
 
     /**
@@ -97,9 +133,18 @@ class ImunisasiController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
+        $validated['balita_id'] = $balita->id;
         $validated['input_by'] = Auth::id();
 
         ImunisasiRecord::create($validated);
+
+        $user = Auth::user();
+        
+        // Redirect based on user role
+        if ($user->role === 'nakes_puskesmas') {
+            return redirect()->route('nakes.imunisasi.index')
+                ->with('success', 'Data imunisasi berhasil ditambahkan.');
+        }
 
         return redirect()->route('imunisasi.index', $balita)
             ->with('success', 'Data imunisasi berhasil ditambahkan.');
@@ -142,6 +187,14 @@ class ImunisasiController extends Controller
 
         $record->update($validated);
 
+        $user = Auth::user();
+        
+        // Redirect based on user role
+        if ($user->role === 'nakes_puskesmas') {
+            return redirect()->route('nakes.imunisasi.index')
+                ->with('success', 'Data imunisasi berhasil diperbarui.');
+        }
+
         return redirect()->route('imunisasi.index', $record->balita)
             ->with('success', 'Data imunisasi berhasil diperbarui.');
     }
@@ -155,6 +208,14 @@ class ImunisasiController extends Controller
 
         $balita = $record->balita;
         $record->delete();
+
+        $user = Auth::user();
+        
+        // Redirect based on user role
+        if ($user->role === 'nakes_puskesmas') {
+            return redirect()->route('nakes.imunisasi.index')
+                ->with('success', 'Data imunisasi berhasil dihapus.');
+        }
 
         return redirect()->route('imunisasi.index', $balita)
             ->with('success', 'Data imunisasi berhasil dihapus.');

@@ -1,11 +1,11 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk — SiPosyandu Jakarta')
+@section('title', 'Portal Petugas — SiPosyandu Jakarta')
 
 @section('form-header')
 <div>
-    <h2 class="text-[1.75rem] font-semibold text-zinc-950 tracking-tight leading-snug">Portal Orang Tua</h2>
-    <p class="mt-1.5 text-zinc-500 text-sm leading-relaxed">Masuk ke dasbor Anda untuk memantau tumbuh kembang balita.</p>
+    <h2 class="text-[1.75rem] font-semibold text-zinc-950 tracking-tight leading-snug">Portal Petugas</h2>
+    <p class="mt-1.5 text-zinc-500 text-sm leading-relaxed">Masuk ke dasbor manajemen khusus Admin, Nakes, dan Kader.</p>
 </div>
 @endsection
 
@@ -22,7 +22,7 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('login') }}" class="space-y-4">
+<form method="POST" action="{{ url('/petugas/login') }}" class="space-y-4">
     @csrf
 
     {{-- Email --}}
@@ -81,19 +81,34 @@
     {{-- Submit --}}
     <div class="fade-in delay-5 pt-1">
         <button type="submit" class="btn-submit">
-            Masuk
+            Masuk ke Dasbor
         </button>
     </div>
 </form>
 
-{{-- Registration Prompt --}}
+{{-- Demo accounts --}}
 <div class="fade-in delay-6 mt-7 pt-6" style="border-top: 1px solid rgba(0,0,0,0.06);">
-    <p class="text-sm text-zinc-500 text-center">
-        Belum memiliki akun SiPosyandu?
-        <br>
-        <a href="{{ route('register') }}" class="inline-block mt-2 font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
-            Daftar sekarang
-        </a>
+    <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-3">Akun Demo Petugas</p>
+    <div class="space-y-1.5">
+        @php
+        $demos = [
+            ['role' => 'Admin Kota',      'email' => 'admin.kota@jakarta.go.id'],
+            ['role' => 'Admin Kecamatan', 'email' => 'admin.kecamatan@jakarta.go.id'],
+            ['role' => 'Admin Kelurahan', 'email' => 'admin.kelurahan@jakarta.go.id'],
+            ['role' => 'Nakes',           'email' => 'nakes@jakarta.go.id'],
+            ['role' => 'Kader',           'email' => 'kader.melati1@jakarta.go.id'],
+        ];
+        @endphp
+        @foreach($demos as $demo)
+        <div class="flex items-center justify-between rounded-xl px-3.5 py-2.5"
+             style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.05);">
+            <span class="text-xs font-medium text-zinc-700">{{ $demo['role'] }}</span>
+            <span class="mono text-[11px] text-zinc-400">{{ $demo['email'] }}</span>
+        </div>
+        @endforeach
+    </div>
+    <p class="text-[11px] text-zinc-400 mt-2.5 text-center">
+        Semua akun: <span class="mono font-medium text-zinc-600">password123</span>
     </p>
 </div>
 

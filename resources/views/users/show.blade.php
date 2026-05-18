@@ -20,6 +20,15 @@ $roleColors = [
     'kader' => 'bg-yellow-100 text-yellow-800',
     'orangtua' => 'bg-gray-100 text-gray-800',
 ];
+
+$authRole = auth()->user()->role;
+$routePrefix = match($authRole) {
+    'admin_kota' => 'admin-kota',
+    'admin_kecamatan' => 'admin-kecamatan',
+    'admin_kelurahan' => 'admin-kelurahan',
+    default => '',
+};
+$usersPrefix = $routePrefix ? "$routePrefix.users" : 'users';
 @endphp
 
 @section('sidebar')
@@ -30,7 +39,7 @@ $roleColors = [
 <div class="max-w-4xl mx-auto">
     <!-- Back Button -->
     <div class="mb-6">
-        <a href="{{ route('users.index') }}" class="inline-flex items-center text-gray-600 hover:text-gray-900">
+        <a href="{{ route($usersPrefix . '.index') }}" class="inline-flex items-center text-gray-600 hover:text-gray-900">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             Kembali ke Daftar User
         </a>
@@ -41,7 +50,7 @@ $roleColors = [
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-900">Detail User</h2>
             <div class="flex space-x-2">
-                <a href="{{ route('users.edit', $user) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm">
+                <a href="{{ route($usersPrefix . '.edit', $user) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     Edit
                 </a>

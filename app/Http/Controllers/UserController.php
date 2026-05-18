@@ -102,7 +102,7 @@ class UserController extends Controller
 
         User::create($validated);
 
-        return redirect()->route('users.index')
+        return redirect()->route($this->getUsersIndexRoute())
             ->with('success', 'User berhasil ditambahkan.');
     }
 
@@ -170,7 +170,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('users.show', $user)
+        return redirect()->route($this->getUsersIndexRoute())
             ->with('success', 'Data user berhasil diperbarui.');
     }
 
@@ -198,7 +198,7 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('users.index')
+        return redirect()->route($this->getUsersIndexRoute())
             ->with('success', 'User berhasil dihapus.');
     }
 
@@ -237,6 +237,21 @@ class UserController extends Controller
 
         return redirect()->route('orangtua.profile.edit')
             ->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    /**
+     * Get users index route based on user role
+     */
+    private function getUsersIndexRoute(): string
+    {
+        $user = auth()->user();
+
+        return match ($user->role) {
+            'admin_kota' => 'admin-kota.users.index',
+            'admin_kecamatan' => 'admin-kecamatan.users.index',
+            'admin_kelurahan' => 'admin-kelurahan.users.index',
+            default => 'users.index',
+        };
     }
 
     /**

@@ -25,7 +25,18 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
 <div class="max-w-4xl mx-auto space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
-        <a href="{{ route($imunisasiPrefix . '.index', ['balita' => $record->balita]) }}" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+        @php
+            // Admin roles don't have imunisasi.index, fall back to balita.show
+            $backAdminRoles = ['admin_kota', 'admin_kecamatan', 'admin_kelurahan'];
+            if (in_array($userRole, $backAdminRoles)) {
+                $backUrl = route($balitaPrefix . '.show', $record->balita);
+            } elseif (Route::has($imunisasiPrefix . '.index')) {
+                $backUrl = route($imunisasiPrefix . '.index', ['balita' => $record->balita]);
+            } else {
+                $backUrl = route($balitaPrefix . '.show', $record->balita);
+            }
+        @endphp
+        <a href="{{ $backUrl }}" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             <span>Kembali</span>
         </a>

@@ -13,6 +13,15 @@ $roleLabels = [
 ];
 
 $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+$authRole = auth()->user()->role;
+$routePrefix = match($authRole) {
+    'admin_kota' => 'admin-kota',
+    'admin_kecamatan' => 'admin-kecamatan',
+    'admin_kelurahan' => 'admin-kelurahan',
+    default => '',
+};
+$usersPrefix = $routePrefix ? "$routePrefix.users" : 'users';
 @endphp
 
 @section('sidebar')
@@ -27,7 +36,7 @@ $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
             <p class="mt-1 text-sm text-gray-600">Isi data lengkap user yang akan didaftarkan.</p>
         </div>
 
-        <form action="{{ route('users.store') }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route($usersPrefix . '.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
 
             <!-- Role Selection -->
@@ -158,7 +167,7 @@ $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
             <!-- Submit Buttons -->
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('users.index') }}" class="px-4 py-2 text-gray-700 hover:text-gray-900">
+                <a href="{{ route($usersPrefix . '.index') }}" class="px-4 py-2 text-gray-700 hover:text-gray-900">
                     Batal
                 </a>
                 <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">

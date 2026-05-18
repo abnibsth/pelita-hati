@@ -54,24 +54,44 @@ $imunisasiPrefix = "$routePrefix.imunisasi";
                     <select name="jenis_imunisasi" id="jenis_imunisasi" required
                         class="mt-1 block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('jenis_imunisasi') border-red-500 @enderror">
                         <option value="">Pilih Imunisasi</option>
+                        <option value="HB-0" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'HB-0' ? 'selected' : '' }}>HB-0 (Hepatitis B0)</option>
                         <option value="BCG" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'BCG' ? 'selected' : '' }}>BCG (Tuberculosis)</option>
-                        <option value="Hepatitis_B" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Hepatitis_B' ? 'selected' : '' }}>Hepatitis B</option>
-                        <option value="Polio_1" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio_1' ? 'selected' : '' }}>Polio 1</option>
-                        <option value="DPT_HB_Hib_1" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'DPT_HB_Hib_1' ? 'selected' : '' }}>DPT-HB-Hib 1</option>
-                        <option value="Polio_2" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio_2' ? 'selected' : '' }}>Polio 2</option>
-                        <option value="DPT_HB_Hib_2" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'DPT_HB_Hib_2' ? 'selected' : '' }}>DPT-HB-Hib 2</option>
-                        <option value="Polio_3" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio_3' ? 'selected' : '' }}>Polio 3</option>
-                        <option value="DPT_HB_Hib_3" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'DPT_HB_Hib_3' ? 'selected' : '' }}>DPT-HB-Hib 3</option>
-                        <option value="Polio_4" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio_4' ? 'selected' : '' }}>Polio 4</option>
+                        <option value="Polio-1" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio-1' ? 'selected' : '' }}>Polio 1</option>
+                        <option value="Polio-2" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio-2' ? 'selected' : '' }}>Polio 2</option>
+                        <option value="Polio-3" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio-3' ? 'selected' : '' }}>Polio 3</option>
+                        <option value="Polio-4" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Polio-4' ? 'selected' : '' }}>Polio 4</option>
+                        <option value="DPT-HB-1" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'DPT-HB-1' ? 'selected' : '' }}>DPT-HB 1</option>
+                        <option value="DPT-HB-2" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'DPT-HB-2' ? 'selected' : '' }}>DPT-HB 2</option>
+                        <option value="DPT-HB-3" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'DPT-HB-3' ? 'selected' : '' }}>DPT-HB 3</option>
                         <option value="Campak" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Campak' ? 'selected' : '' }}>Campak</option>
+                        <option value="Campak-Rubella" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Campak-Rubella' ? 'selected' : '' }}>Campak-Rubella</option>
                         <option value="MR" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'MR' ? 'selected' : '' }}>MR (Measles Rubella)</option>
                         <option value="JE" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'JE' ? 'selected' : '' }}>JE (Japanese Encephalitis)</option>
                         <option value="PCV" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'PCV' ? 'selected' : '' }}>PCV (Pneumococcal)</option>
                         <option value="Rotavirus" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Rotavirus' ? 'selected' : '' }}>Rotavirus</option>
-                        <option value="Varicella" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Varicella' ? 'selected' : '' }}>Varicella (Cacar Air)</option>
-                        <option value="Influenza" {{ old('jenis_imunisasi', $record->jenis_imunisasi) === 'Influenza' ? 'selected' : '' }}>Influenza</option>
                     </select>
                     @error('jenis_imunisasi')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="lokasi" class="block text-sm font-medium text-gray-700">Lokasi Imunisasi <span class="text-red-500">*</span></label>
+                    <select name="lokasi" id="lokasi" required
+                        class="mt-1 block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('lokasi') border-red-500 @enderror">
+                        <option value="">Pilih Lokasi</option>
+                        <option value="Posyandu" {{ old('lokasi', $record->lokasi) === 'Posyandu' ? 'selected' : '' }}>Posyandu</option>
+                        <option value="Puskesmas" {{ old('lokasi', $record->lokasi) === 'Puskesmas' ? 'selected' : '' }}>Puskesmas</option>
+                        <option value="RS" {{ old('lokasi', $record->lokasi) === 'RS' ? 'selected' : '' }}>Rumah Sakit</option>
+                        <option value="Lainnya" {{ old('lokasi', $record->lokasi) === 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                    </select>
+                    @error('lokasi')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="batch_number" class="block text-sm font-medium text-gray-700">No. Batch / Merk Vaksin</label>
+                    <input type="text" name="batch_number" id="batch_number"
+                        class="mt-1 block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('batch_number') border-red-500 @enderror"
+                        value="{{ old('batch_number', $record->batch_number) }}" placeholder="Opsional">
+                    @error('batch_number')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
             </div>
 

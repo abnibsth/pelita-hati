@@ -41,12 +41,19 @@ $pertumbuhanPrefix = "$routePrefix.pertumbuhan";
             </div>
             <div class="flex space-x-2">
                 @can('update', $balita)
+                @if(Route::has($balitaPrefix . '.edit'))
                 <x-button href="{{ route($balitaPrefix . '.edit', $balita) }}" variant="outline" size="sm">Edit</x-button>
+                @endif
                 @endcan
-                <x-button href="#pertumbuhan" variant="primary" size="sm">
+                
+                @if(in_array($userRole, ['kader', 'admin_kecamatan', 'admin_kelurahan', 'admin_kota', 'nakes_puskesmas']))
+                @if(Route::has($pertumbuhanPrefix . '.create'))
+                <x-button href="{{ route($pertumbuhanPrefix . '.create', ['balita' => $balita]) }}" variant="primary" size="sm">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Tambah Penimbangan
                 </x-button>
+                @endif
+                @endif
             </div>
         </div>
     </div>
@@ -156,10 +163,12 @@ $pertumbuhanPrefix = "$routePrefix.pertumbuhan";
         </div>
         @else
         <x-empty-state message="Belum ada data pertumbuhan">
-            @if($userRole !== 'nakes_puskesmas')
+            @if(in_array($userRole, ['kader', 'admin_kecamatan', 'admin_kelurahan', 'admin_kota', 'nakes_puskesmas']))
+            @if(Route::has($pertumbuhanPrefix . '.create'))
             <x-slot:action>
-                <x-button href="{{ route($pertumbuhanPrefix . '.store', ['balita' => $balita]) }}">Tambah Data Penimbangan</x-button>
+                <x-button href="{{ route($pertumbuhanPrefix . '.create', ['balita' => $balita]) }}">Tambah Data Penimbangan</x-button>
             </x-slot:action>
+            @endif
             @endif
         </x-empty-state>
         @endif
@@ -202,7 +211,17 @@ $pertumbuhanPrefix = "$routePrefix.pertumbuhan";
     </x-card>
 
     <!-- Imunisasi Section -->
-    <x-card title="Riwayat Imunisasi">
+    <x-card>
+        <x-slot:title>
+            <div class="flex justify-between items-center w-full">
+                <span>Riwayat Imunisasi</span>
+                @if(Route::has($routePrefix . '.imunisasi.index'))
+                <a href="{{ route($routePrefix . '.imunisasi.index', ['balita' => $balita]) }}" class="text-sm font-medium text-primary-600 hover:text-primary-800">Lihat Semua →</a>
+                @elseif(Route::has($routePrefix . '.balita.imunisasi.index'))
+                <a href="{{ route($routePrefix . '.balita.imunisasi.index', ['balita' => $balita]) }}" class="text-sm font-medium text-primary-600 hover:text-primary-800">Lihat Semua →</a>
+                @endif
+            </div>
+        </x-slot:title>
         @if($balita->imunisasiRecords->count() > 0)
         <div class="space-y-2">
             @foreach($balita->imunisasiRecords as $imunisasi)
@@ -216,7 +235,17 @@ $pertumbuhanPrefix = "$routePrefix.pertumbuhan";
             @endforeach
         </div>
         @else
-        <x-empty-state message="Belum ada riwayat imunisasi" />
+        <x-empty-state message="Belum ada riwayat imunisasi">
+            @if(Route::has($routePrefix . '.imunisasi.index'))
+            <x-slot:action>
+                <x-button href="{{ route($routePrefix . '.imunisasi.index', ['balita' => $balita]) }}">Kelola Imunisasi</x-button>
+            </x-slot:action>
+            @elseif(Route::has($routePrefix . '.balita.imunisasi.index'))
+            <x-slot:action>
+                <x-button href="{{ route($routePrefix . '.balita.imunisasi.index', ['balita' => $balita]) }}">Kelola Imunisasi</x-button>
+            </x-slot:action>
+            @endif
+        </x-empty-state>
         @endif
     </x-card>
 </div>

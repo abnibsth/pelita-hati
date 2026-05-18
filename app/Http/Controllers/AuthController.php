@@ -14,11 +14,58 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Show login form
+     * Show login form for Orang Tua
      */
     public function showLogin()
     {
         return view('auth.login');
+    }
+
+    /**
+     * Show registration form for Orang Tua
+     */
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Handle registration request for Orang Tua
+     */
+    public function register(Request $request)
+    {
+        $request->validate([
+            'nik' => 'required|string|size:16|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8', // removed confirmed requirement as instructed in plan
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'nik' => $request->nik,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'orangtua',
+            'is_active' => true,
+        ]);
+
+        // Auto-link existing Balita records to this new Orangtua account based on NIK
+        \App\Models\Balita::where('mother_nik', $user->nik)
+            ->whereNull('user_id')
+            ->update(['user_id' => $user->id]);
+
+        Auth::login($user);
+
+        return redirect()->intended($this->getRedirectRoute('orangtua'))->with('success', 'Pendaftaran berhasil. Selamat datang di SiPosyandu!');
+    }
+
+    /**
+     * Show login form for Petugas/Admin
+     */
+    public function showAdminLogin()
+    {
+        return view('auth.admin-login');
     }
 
     /**
@@ -32,9 +79,24 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
             $user = Auth::user();
+
+            // Strict portal checks
+            if ($request->is('login') && $user->role !== 'orangtua') {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'email' => 'Akun Petugas tidak bisa masuk di sini. Silakan masuk melalui Portal Petugas.',
+                ]);
+            }
+
+            if ($request->is('petugas/login') && $user->role === 'orangtua') {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'email' => 'Akun Orang Tua tidak bisa masuk di sini. Silakan masuk melalui Portal Orang Tua.',
+                ]);
+            }
+
+            $request->session()->regenerate();
 
             // Redirect based on role
             return redirect()->intended($this->getRedirectRoute($user->role));
@@ -50,9 +112,15 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        $role = Auth::user()?->role;
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($role && $role !== 'orangtua') {
+            return redirect()->route('admin.login');
+        }
 
         return redirect()->route('login');
     }

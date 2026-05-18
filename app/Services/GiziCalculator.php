@@ -25,9 +25,6 @@ class GiziCalculator
         int $ageMonths,
         string $gender
     ): array {
-        // Dapatkan nilai referensi WHO
-        $whoStandards = $this->getWhoStandards($ageMonths, $gender);
-
         // Hitung Z-Scores
         $zScoreBBU = $this->calculateZScoreBBU($beratBadan, $ageMonths, $gender);
         $zScoreTBU = $this->calculateZScoreTBU($tinggiBadan, $ageMonths, $gender);

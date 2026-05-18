@@ -15,8 +15,16 @@ use Illuminate\Support\Facades\Route;
 
 // Guest routes
 Route::middleware('guest')->group(function () {
+    // Orang Tua Login & Register
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+
+    // Petugas (Admin/Nakes/Kader) Login
+    Route::get('/petugas/login', [AuthController::class, 'showAdminLogin'])->name('admin.login');
+    Route::post('/petugas/login', [AuthController::class, 'login']); // Reusing login logic as it handles role redirection
+
 
     // Forgot password routes
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
@@ -25,14 +33,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
-// Authenticated routes
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Landing page (accessible to all)
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
-    // Home redirect based on role
-    Route::get('/', function () {
+Route::get('/dashboard', function () {
+    if (auth()->check()) {
         $user = auth()->user();
-
         return match ($user->role) {
             'admin_kota' => redirect()->route('admin-kota.dashboard'),
             'admin_kecamatan' => redirect()->route('admin-kecamatan.dashboard'),
@@ -42,7 +50,13 @@ Route::middleware('auth')->group(function () {
             'orangtua' => redirect()->route('orangtua.dashboard'),
             default => redirect()->route('login'),
         };
-    })->name('home');
+    }
+    return redirect()->route('login');
+})->name('dashboard');
+
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // =========================================================================
     // ADMIN KOTA (Dinkes Jakarta) - Full Access to ALL Data
@@ -65,9 +79,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
         Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
+        Route::get('/balita/{balita}/edit', [BalitaController::class, 'edit'])->name('balita.edit');
+        Route::put('/balita/{balita}', [BalitaController::class, 'update'])->name('balita.update');
+        Route::delete('/balita/{balita}', [BalitaController::class, 'destroy'])->name('balita.destroy');
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
+        Route::get('/balita/{balita}/pertumbuhan/create', [PertumbuhanController::class, 'create'])->name('pertumbuhan.create');
+        Route::post('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'store'])->name('pertumbuhan.store');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
+        Route::get('/pertumbuhan/{record}/edit', [PertumbuhanController::class, 'edit'])->name('pertumbuhan.edit');
+        Route::put('/pertumbuhan/{record}', [PertumbuhanController::class, 'update'])->name('pertumbuhan.update');
+        Route::delete('/pertumbuhan/{record}', [PertumbuhanController::class, 'destroy'])->name('pertumbuhan.destroy');
         Route::get('/imunisasi/{record}', [ImunisasiController::class, 'show'])->name('imunisasi.show');
+        Route::get('/balita/{balita}/imunisasi', [ImunisasiController::class, 'indexByBalita'])->name('imunisasi.index');
 
         // Reports & Analytics
         Route::get('/reports/skdn', [DashboardController::class, 'adminKota'])->name('reports.skdn');
@@ -94,9 +117,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
         Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
+        Route::get('/balita/{balita}/edit', [BalitaController::class, 'edit'])->name('balita.edit');
+        Route::put('/balita/{balita}', [BalitaController::class, 'update'])->name('balita.update');
+        Route::delete('/balita/{balita}', [BalitaController::class, 'destroy'])->name('balita.destroy');
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
+        Route::get('/balita/{balita}/pertumbuhan/create', [PertumbuhanController::class, 'create'])->name('pertumbuhan.create');
+        Route::post('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'store'])->name('pertumbuhan.store');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
+        Route::get('/pertumbuhan/{record}/edit', [PertumbuhanController::class, 'edit'])->name('pertumbuhan.edit');
+        Route::put('/pertumbuhan/{record}', [PertumbuhanController::class, 'update'])->name('pertumbuhan.update');
+        Route::delete('/pertumbuhan/{record}', [PertumbuhanController::class, 'destroy'])->name('pertumbuhan.destroy');
         Route::get('/imunisasi/{record}', [ImunisasiController::class, 'show'])->name('imunisasi.show');
+        Route::get('/balita/{balita}/imunisasi', [ImunisasiController::class, 'indexByBalita'])->name('imunisasi.index');
 
         // Reports
         Route::get('/reports/skdn', [DashboardController::class, 'adminKecamatan'])->name('reports.skdn');
@@ -128,9 +160,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
         Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
+        Route::get('/balita/{balita}/edit', [BalitaController::class, 'edit'])->name('balita.edit');
+        Route::put('/balita/{balita}', [BalitaController::class, 'update'])->name('balita.update');
+        Route::delete('/balita/{balita}', [BalitaController::class, 'destroy'])->name('balita.destroy');
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
+        Route::get('/balita/{balita}/pertumbuhan/create', [PertumbuhanController::class, 'create'])->name('pertumbuhan.create');
+        Route::post('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'store'])->name('pertumbuhan.store');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
+        Route::get('/pertumbuhan/{record}/edit', [PertumbuhanController::class, 'edit'])->name('pertumbuhan.edit');
+        Route::put('/pertumbuhan/{record}', [PertumbuhanController::class, 'update'])->name('pertumbuhan.update');
+        Route::delete('/pertumbuhan/{record}', [PertumbuhanController::class, 'destroy'])->name('pertumbuhan.destroy');
         Route::get('/imunisasi/{record}', [ImunisasiController::class, 'show'])->name('imunisasi.show');
+        Route::get('/balita/{balita}/imunisasi', [ImunisasiController::class, 'indexByBalita'])->name('imunisasi.index');
 
         // Reports
         Route::get('/reports/skdn', [DashboardController::class, 'adminKelurahan'])->name('reports.skdn');
@@ -148,8 +189,8 @@ Route::middleware('auth')->group(function () {
 
         // Imunisasi Input (from puskesmas) - All records in puskesmas area
         Route::get('/imunisasi', [ImunisasiController::class, 'index'])->name('imunisasi.index');
-        Route::get('/imunisasi/create', [ImunisasiController::class, 'create'])->name('imunisasi.create');
-        Route::post('/imunisasi', [ImunisasiController::class, 'store'])->name('imunisasi.store');
+        Route::get('/imunisasi/create/{balita?}', [ImunisasiController::class, 'create'])->name('imunisasi.create');
+        Route::post('/imunisasi/{balita}', [ImunisasiController::class, 'store'])->name('imunisasi.store');
         Route::get('/imunisasi/{record}', [ImunisasiController::class, 'show'])->name('imunisasi.show');
         Route::get('/imunisasi/{record}/edit', [ImunisasiController::class, 'edit'])->name('imunisasi.edit');
         Route::put('/imunisasi/{record}', [ImunisasiController::class, 'update'])->name('imunisasi.update');
@@ -160,9 +201,11 @@ Route::middleware('auth')->group(function () {
         // Data Balita (View in their puskesmas area for health monitoring)
         Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
         Route::get('/balita/{balita}', [BalitaController::class, 'show'])->name('balita.show');
-        
+
         // Pertumbuhan (View only for nakes)
         Route::get('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'index'])->name('pertumbuhan.index');
+        Route::get('/balita/{balita}/pertumbuhan/create', [PertumbuhanController::class, 'create'])->name('pertumbuhan.create');
+        Route::post('/balita/{balita}/pertumbuhan', [PertumbuhanController::class, 'store'])->name('pertumbuhan.store');
         Route::get('/pertumbuhan/{record}', [PertumbuhanController::class, 'show'])->name('pertumbuhan.show');
 
         // Reports

@@ -36,14 +36,14 @@ class BalitaController extends Controller
             $query->whereHas('posyandu', function ($q) use ($user) {
                 $q->where('kelurahan_id', $user->kelurahan_id);
             })
-                ->with(['pertumbuhanRecords' => function ($q) {
+                ->with(['posyandu.kelurahan.kecamatan', 'pertumbuhanRecords' => function ($q) {
                     $q->orderBy('tanggal', 'desc')->limit(1);
                 }]);
         } elseif ($user->role === 'admin_kecamatan') {
             $query->whereHas('posyandu.kelurahan', function ($q) use ($user) {
                 $q->where('kecamatan_id', $user->kecamatan_id);
             })
-                ->with(['pertumbuhanRecords' => function ($q) {
+                ->with(['posyandu.kelurahan.kecamatan', 'pertumbuhanRecords' => function ($q) {
                     $q->orderBy('tanggal', 'desc')->limit(1);
                 }]);
         } elseif ($user->role === 'orangtua') {
@@ -156,6 +156,12 @@ class BalitaController extends Controller
         $birthDate = Carbon::parse($validated['birth_date']);
         $validated['age_months'] = $birthDate->diffInMonths(now());
 
+        // Automatically link to Orangtua account if exists based on mother_nik
+        $parentUser = \App\Models\User::where('role', 'orangtua')->where('nik', $validated['mother_nik'])->first();
+        if ($parentUser) {
+            $validated['user_id'] = $parentUser->id;
+        }
+
         Balita::create($validated);
 
         return redirect()->route($this->getBalitaIndexRoute())
@@ -242,9 +248,24 @@ class BalitaController extends Controller
             'status' => 'required|in:aktif,pindah,meninggal',
         ]);
 
+        // Automatically link to Orangtua account if exists based on mother_nik
+        $parentUser = \App\Models\User::where('role', 'orangtua')->where('nik', $validated['mother_nik'])->first();
+        if ($parentUser) {
+            $validated['user_id'] = $parentUser->id;
+        }
+
         $balita->update($validated);
 
-        return redirect()->route($this->getBalitaIndexRoute())
+        // Redirect to balita detail instead of index for better UX
+        $showRoute = match (Auth::user()->role) {
+            'admin_kota' => 'admin-kota.balita.show',
+            'admin_kecamatan' => 'admin-kecamatan.balita.show',
+            'admin_kelurahan' => 'admin-kelurahan.balita.show',
+            'kader' => 'kader.balita.show',
+            default => 'kader.balita.show',
+        };
+
+        return redirect()->route($showRoute, $balita)
             ->with('success', 'Data balita berhasil diperbarui.');
     }
 

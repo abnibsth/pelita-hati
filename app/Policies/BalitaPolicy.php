@@ -83,6 +83,11 @@ class BalitaPolicy
             return $user->kelurahan_id === $balita->posyandu->kelurahan_id;
         }
 
+        // Nakes Puskesmas can update within their puskesmas area
+        if ($user->role === 'nakes_puskesmas') {
+            return $user->puskesmas->kecamatan_id === $balita->posyandu->kelurahan->kecamatan_id;
+        }
+
         // Kader can only update balitas in their posyandu
         if ($user->role === 'kader') {
             return $user->posyandu_id === $balita->posyandu_id;
